@@ -28,6 +28,7 @@ func main() {
 	r.Get("/", handlers.Status)
 	r.Get("/v*", handlers.CatchAll)
 	r.Post("/v*", handlers.CatchAll)
+	r.Get("/api/entitlements*", handlers.CatchAll)
 
 	l.Log.Info("Starting MBOP Server on :8090")
 	if err := http.ListenAndServe(":8090", r); err != nil {
