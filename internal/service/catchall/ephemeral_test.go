@@ -1,4 +1,4 @@
-package main
+package catchall
 
 import (
 	"fmt"
@@ -32,9 +32,11 @@ func (suite *TestSuite) TestJWTGet() {
 
 	os.Setenv("KEYCLOAK_SERVER", k8sServer.URL)
 
-	mbopServer := MakeNewMBOPServer()
+	// dummy muxer for the test
+	mux := http.NewServeMux()
+	mux.Handle("/", http.HandlerFunc(MakeNewMBOPServer().MainHandler))
 
-	sut := httptest.NewServer(mbopServer.getMux())
+	sut := httptest.NewServer(mux)
 	defer sut.Close()
 
 	resp, err := http.Get(fmt.Sprintf("%s/v1/jwt", sut.URL))

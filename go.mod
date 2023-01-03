@@ -3,6 +3,7 @@ module github.com/redhatinsights/mbop
 go 1.18
 
 require (
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zapr v1.2.3
 	github.com/stretchr/testify v1.7.1
