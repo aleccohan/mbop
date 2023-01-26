@@ -10,8 +10,8 @@ COPY go.sum go.sum
 USER 0
 RUN go mod download
 
-COPY cmd/mbop/main.go main.go
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build ./cmd/mbop/mbop.go
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.7-923
 WORKDIR /

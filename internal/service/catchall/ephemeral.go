@@ -1,4 +1,4 @@
-package main
+package catchall
 
 import (
 	"context"
@@ -6,38 +6,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/go-logr/logr"
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
+	"github.com/redhatinsights/mbop/internal/models"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-type User struct {
-	Username      string `json:"username"`
-	ID            int    `json:"id"`
-	Email         string `json:"email"`
-	FirstName     string `json:"first_name"`
-	LastName      string `json:"last_name"`
-	AccountNumber string `json:"account_number"`
-	AddressString string `json:"address_string"`
-	IsActive      bool   `json:"is_active"`
-	IsOrgAdmin    bool   `json:"is_org_admin"`
-	IsInternal    bool   `json:"is_internal"`
-	Locale        string `json:"locale"`
-	OrgID         string `json:"org_id"`
-	DisplayName   string `json:"display_name"`
-	Type          string `json:"type"`
-	Entitlements  string `json:"entitlements"`
-}
+// TODO: move these to the models package (internal/models/) if we can reuse
+// them, otherwise label them appropriately.
 
 type JSONStruct struct {
 	PublicKey       string `json:"public_key"`
@@ -53,13 +34,13 @@ type usersByInput struct {
 }
 
 type Resp struct {
-	User      User   `json:"user"`
-	Mechanism string `json:"mechanism"`
+	User      models.User `json:"user"`
+	Mechanism string      `json:"mechanism"`
 }
 
 type AccV2Resp struct {
-	Users     []User `json:"users"`
-	UserCount int    `json:"userCount"`
+	Users     []models.User `json:"users"`
+	UserCount int           `json:"userCount"`
 }
 
 type Realm struct {
@@ -71,7 +52,7 @@ type V1UserInput struct {
 	Users []string `json:"users"`
 }
 
-func (m *MBOPServer) findUserByID(username string) (*User, error) {
+func (m *MBOPServer) findUserByID(username string) (*models.User, error) {
 	users, err := m.getUsers()
 
 	if err != nil {
@@ -86,14 +67,14 @@ func (m *MBOPServer) findUserByID(username string) (*User, error) {
 	return nil, fmt.Errorf("User is not known")
 }
 
-func (m *MBOPServer) findUsersBy(accountNo string, orgID string, adminOnly string, status string, limit int, sortOrder string, queryBy string, input *usersByInput, users *V1UserInput) ([]User, error) {
+func (m *MBOPServer) findUsersBy(accountNo string, orgID string, adminOnly string, status string, limit int, sortOrder string, queryBy string, input *usersByInput, users *V1UserInput) ([]models.User, error) {
 	usersList, err := m.getUsers()
 
 	if err != nil {
 		return nil, err
 	}
 
-	out := []User{}
+	out := []models.User{}
 	for _, user := range usersList {
 		// When adminOnly is true, parameter “status” is ignored
 		if adminOnly == "true" && !user.IsOrgAdmin {
@@ -189,19 +170,19 @@ func (m *MBOPServer) getJWT(realm string) (*JSONStruct, error) {
 	return jsonstruct, nil
 }
 
-func (m *MBOPServer) getUser(w http.ResponseWriter, r *http.Request) (*User, error) {
+func (m *MBOPServer) getUser(w http.ResponseWriter, r *http.Request) (*models.User, error) {
 	auth := r.Header.Get("Authorization")
 	if auth == "" {
-		return &User{}, fmt.Errorf("no auth header found")
+		return &models.User{}, fmt.Errorf("no auth header found")
 	}
 	if !strings.Contains(auth, "Basic") {
-		return &User{}, fmt.Errorf("auth header is not basic")
+		return &models.User{}, fmt.Errorf("auth header is not basic")
 	}
 
 	data, err := base64.StdEncoding.DecodeString(auth[6:])
 
 	if err != nil {
-		return &User{}, fmt.Errorf("could not split header")
+		return &models.User{}, fmt.Errorf("could not split header")
 	}
 	parts := strings.Split(string(data), ":")
 
@@ -209,7 +190,7 @@ func (m *MBOPServer) getUser(w http.ResponseWriter, r *http.Request) (*User, err
 	password := parts[1]
 
 	if err != nil {
-		return &User{}, fmt.Errorf("can't create keycloak client: %s", err.Error())
+		return &models.User{}, fmt.Errorf("can't create keycloak client: %s", err.Error())
 	}
 
 	oauthClientConfig := clientcredentials.Config{
@@ -223,19 +204,19 @@ func (m *MBOPServer) getUser(w http.ResponseWriter, r *http.Request) (*User, err
 	resp, err := k.Get(m.getURL("/auth/realms/redhat-external/account/"))
 
 	if err != nil {
-		return &User{}, fmt.Errorf("couldn't auth user: %s", err.Error())
+		return &models.User{}, fmt.Errorf("couldn't auth user: %s", err.Error())
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return &User{}, fmt.Errorf("user unauthorized: %d", resp.StatusCode)
+		return &models.User{}, fmt.Errorf("user unauthorized: %d", resp.StatusCode)
 	}
 
 	userObj, err := m.findUserByID(username)
 
 	if err != nil {
-		return &User{}, fmt.Errorf("couldn't find user: %s", err.Error())
+		return &models.User{}, fmt.Errorf("couldn't find user: %s", err.Error())
 	}
 	return userObj, nil
 }
@@ -262,16 +243,13 @@ func (m *MBOPServer) authHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(str))
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request) {
-}
-
 func (m *MBOPServer) usersV1(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	filt := &V1UserInput{}
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "malformed input", http.StatusInternalServerError)
 		return
@@ -316,7 +294,7 @@ type usersSpec struct {
 	Attributes map[string][]string `json:"attributes"`
 }
 
-func (m *MBOPServer) getUsers() (users []User, err error) {
+func (m *MBOPServer) getUsers() (users []models.User, err error) {
 	resp, err := m.Client.Get(m.getURL("/auth/admin/realms/redhat-external/users", map[string]string{"max": "2000"}))
 	if err != nil {
 		fmt.Printf("\n\n%s\n\n", err.Error())
@@ -326,7 +304,7 @@ func (m *MBOPServer) getUsers() (users []User, err error) {
 
 	obj := &[]usersSpec{}
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -337,7 +315,7 @@ func (m *MBOPServer) getUsers() (users []User, err error) {
 		return nil, err
 	}
 
-	users = []User{}
+	users = []models.User{}
 
 	for _, user := range *obj {
 		IsActiveRaw := user.Attributes["is_active"][0]
@@ -363,7 +341,7 @@ func (m *MBOPServer) getUsers() (users []User, err error) {
 			entitle = user.Attributes["entitlements"][0]
 		}
 
-		users = append(users, User{
+		users = append(users, models.User{
 			Username:      user.Username,
 			ID:            ID,
 			Email:         user.Email,
@@ -411,7 +389,7 @@ func (m *MBOPServer) usersV1Handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, string(str))
 	case urlParts[3] == "usersBy" && r.Method == "POST":
 		filt := &usersByInput{}
-		data, err := ioutil.ReadAll(r.Body)
+		data, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "malformed input", http.StatusInternalServerError)
 			return
@@ -462,7 +440,7 @@ func (m *MBOPServer) usersV2V3Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	obj := &usersByInput{}
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		return
 	}
@@ -511,11 +489,8 @@ func (m *MBOPServer) entitlements(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(userObj.Entitlements))
 }
 
-func (m *MBOPServer) mainHandler(w http.ResponseWriter, r *http.Request) {
-	log.Info(fmt.Sprintf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL))
+func (m *MBOPServer) MainHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case r.URL.Path == "/":
-		statusHandler(w, r)
 	case r.URL.Path == "/v1/users":
 		m.usersV1(w, r)
 	case r.URL.Path == "/v1/jwt":
@@ -533,8 +508,6 @@ func (m *MBOPServer) mainHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var log logr.Logger
-
 func (m *MBOPServer) getURL(path string, query ...map[string]string) string {
 	url := url.URL{
 		Scheme: m.server.Scheme,
@@ -549,27 +522,6 @@ func (m *MBOPServer) getURL(path string, query ...map[string]string) string {
 	}
 	url.RawQuery = q.Encode()
 	return url.String()
-}
-
-func (m *MBOPServer) getMux() *http.ServeMux {
-	zapLog, err := zap.NewDevelopment()
-	if err != nil {
-		panic(fmt.Sprintf("who watches the watchmen (%v)?", err))
-	}
-	log = zapr.NewLogger(zapLog)
-
-	oauthClientConfig := clientcredentials.Config{
-		ClientID:       "admin-cli",
-		ClientSecret:   "",
-		TokenURL:       m.getURL("/auth/realms/master/protocol/openid-connect/token"),
-		EndpointParams: url.Values{"grant_type": {"password"}, "username": {m.username}, "password": {m.password}},
-	}
-
-	m.Client = oauthClientConfig.Client(context.Background())
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", m.mainHandler)
-	return mux
 }
 
 type MBOPServer struct {
@@ -595,22 +547,20 @@ func MakeNewMBOPServer() *MBOPServer {
 		os.Exit(127)
 	}
 
-	return &MBOPServer{
+	m := &MBOPServer{
 		server:   keyServer,
 		username: KeyCloakUsername,
 		password: KeyCloakPassword,
 	}
-}
 
-func main() {
-	mbServer := MakeNewMBOPServer()
-	mbServerObj := http.Server{
-		Addr:              ":8090",
-		ReadHeaderTimeout: 2 * time.Second,
-		Handler:           mbServer.getMux(),
+	oauthClientConfig := clientcredentials.Config{
+		ClientID:       "admin-cli",
+		ClientSecret:   "",
+		TokenURL:       m.getURL("/auth/realms/master/protocol/openid-connect/token"),
+		EndpointParams: url.Values{"grant_type": {"password"}, "username": {m.username}, "password": {m.password}},
 	}
 
-	if err := mbServerObj.ListenAndServe(); err != nil {
-		log.Error(err, "reason", "server couldn't start")
-	}
+	m.Client = oauthClientConfig.Client(context.Background())
+
+	return m
 }
