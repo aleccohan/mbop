@@ -2,6 +2,7 @@ package catchall
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -43,6 +44,8 @@ func (suite *TestSuite) TestJWTGet() {
 
 	assert.Nil(suite.T(), err, "error was not nil")
 	assert.Equal(suite.T(), 200, resp.StatusCode, "status code not good")
+	b, err := io.ReadAll(resp.Body)
+	assert.Equal(suite.T(), string(testData), string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
 
 	defer resp.Body.Close()
 }

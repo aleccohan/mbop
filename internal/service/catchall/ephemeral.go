@@ -144,7 +144,12 @@ func (m *MBOPServer) jwtHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, resp.PublicKey)
+	b, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, "could not create response", http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, string(b))
 }
 
 func (m *MBOPServer) getJWT(realm string) (*JSONStruct, error) {
