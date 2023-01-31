@@ -23,7 +23,9 @@ func (suite *TestSuite) SetupSuite() {
 func (suite *TestSuite) TestJWTGet() {
 	testData, _ := os.ReadFile("testdata/jwt.json")
 	testDataStruct := &JSONStruct{}
-	json.Unmarshal([]byte(testData), testDataStruct)
+	err := json.Unmarshal([]byte(testData), testDataStruct)
+	assert.Nil(suite.T(), err, "error was not nil")
+
 	k8sServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/auth/realms/redhat-external/" {
 			w.WriteHeader(http.StatusOK)

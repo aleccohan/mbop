@@ -3,10 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RedHatInsights/jwk2pem"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/RedHatInsights/jwk2pem"
 )
 
 func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
@@ -18,12 +19,8 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		type JwkRsp struct {
-			PublicKey string `json:"public_key"`
-		}
-
-		jwkUrl := os.Getenv("JWK_URL")
-		resp, err := http.Get(jwkUrl)
+		jwkURL := os.Getenv("JWK_URL")
+		resp, err := http.Get(jwkURL) //nolint
 
 		if err != nil {
 			http.Error(w, "could not get JWKs", http.StatusBadRequest)
@@ -39,16 +36,24 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		keys := jwk2pem.JWKeys{}
-		json.Unmarshal([]byte(bdata), &keys)
+		err = json.Unmarshal([]byte(bdata), &keys)
+		if err != nil {
+			http.Error(w, "could not read response", http.StatusInternalServerError)
+			return
+		}
 
 		pem := jwk2pem.JWKsToPem(keys, kid)
 
 		if pem == nil {
-			http.Error(w, fmt.Sprintf("no JWK for kid: %v", kid), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("no JWK for kid: %v", kid), http.StatusBadRequest)
 			return
 		}
 
-		w.Write(pem)
+		_, err = w.Write(pem)
+		if err != nil {
+			http.Error(w, "failed to write response", http.StatusInternalServerError)
+			return
+		}
 	default:
 		fmt.Println("CATCHALL")
 		CatchAll(w, r)
