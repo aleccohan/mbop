@@ -29,6 +29,8 @@ objects:
       spec:
         containers:
         - env:
+          - name: JWT_MODULE
+            value: ${JWT_MODULE}
           - name: KEYCLOAK_SERVER
             value: "${KEYCLOAK_SCHEME}://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}${KEYCLOAK_PATH}"
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
@@ -92,3 +94,6 @@ parameters:
 - name: CPU_REQUEST
   description: cpu request for mbop pod
   value: "0.5"
+- name: JWT_MODULE
+  description: optional JWT endpoint module override
+  value: ""
