@@ -25,6 +25,7 @@ func main() {
 	r.Get("/v*", handlers.CatchAll)
 	r.Post("/v*", handlers.CatchAll)
 	r.Get("/api/entitlements*", handlers.CatchAll)
+	r.Get("/v1/jwt", handlers.JWTV1Handler)
 
 	srv := http.Server{
 		Addr:              ":8090",
