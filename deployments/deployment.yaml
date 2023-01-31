@@ -29,6 +29,8 @@ objects:
       spec:
         containers:
         - env:
+          - name: JWK_URL
+            value: ${JWK_URL}
           - name: JWT_MODULE
             value: ${JWT_MODULE}
           - name: KEYCLOAK_SERVER
@@ -96,4 +98,7 @@ parameters:
   value: "0.5"
 - name: JWT_MODULE
   description: optional JWT endpoint module override
+  value: ""
+- name: JWK_URL
+  description: optional JWK endpoint for use in JWT_MODULE implementations
   value: ""
