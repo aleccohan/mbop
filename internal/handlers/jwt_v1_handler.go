@@ -13,6 +13,10 @@ import (
 func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 	switch os.Getenv("JWT_MODULE") {
 	case "aws":
+		type JWTResp struct {
+			Pubkey string `json:"pubkey"`
+		}
+
 		kid := r.URL.Query().Get("kid")
 		if kid == "" {
 			http.Error(w, "kid required to return correct pub key", http.StatusBadRequest)
@@ -23,7 +27,7 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 		resp, err := http.Get(jwkURL) //nolint
 
 		if err != nil {
-			http.Error(w, "could not get JWKs", http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("could not get JWKs: %s", err), http.StatusBadRequest)
 			return
 		}
 
@@ -45,17 +49,17 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 		pem := jwk2pem.JWKsToPem(keys, kid)
 
 		if pem == nil {
-			http.Error(w, fmt.Sprintf("no JWK for kid: %v", kid), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("no JWK for kid: %v", kid), http.StatusNotFound)
 			return
 		}
 
-		_, err = w.Write(pem)
+		d, _ := json.Marshal(JWTResp{Pubkey: string(pem)})
+		_, err = w.Write(d)
 		if err != nil {
 			http.Error(w, "failed to write response", http.StatusInternalServerError)
 			return
 		}
 	default:
-		fmt.Println("CATCHALL")
 		CatchAll(w, r)
 	}
 }
