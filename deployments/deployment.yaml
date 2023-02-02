@@ -103,4 +103,19 @@ parameters:
   value: ""
 - name: JWK_URL
   description: optional JWK endpoint for use in JWT_MODULE implementations
+- name: CLIENT_ID
+  description: cognito client id
+  value: ""
+- name: CLIENT_SECRET
+  description: cognito client secret
+  value: ""
+- name: TOKEN_URL
+- name: OAUTH_TOKEN_URL
+  description: AMS token url
+  value: ""
+- name: AMS_URL
+  description: AMS base url
+  value: ""
+- name: COGNITO_SCOPE
+  description: cognito scope value
   value: ""

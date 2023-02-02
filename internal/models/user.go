@@ -1,12 +1,15 @@
 package models
 
+type Users struct {
+	Users []User `json:"users,omitempty"`
+}
+
 type User struct {
 	Username      string `json:"username"`
-	ID            int    `json:"id"`
+	ID            string `json:"id"`
 	Email         string `json:"email"`
 	FirstName     string `json:"first_name"`
 	LastName      string `json:"last_name"`
-	AccountNumber string `json:"account_number"`
 	AddressString string `json:"address_string"`
 	IsActive      bool   `json:"is_active"`
 	IsOrgAdmin    bool   `json:"is_org_admin"`
@@ -15,5 +18,13 @@ type User struct {
 	OrgID         string `json:"org_id"`
 	DisplayName   string `json:"display_name"`
 	Type          string `json:"type"`
-	Entitlements  string `json:"entitlements"`
+}
+
+type UserQuery struct {
+	SortOrder string `json:"sortOrder"`
+	QueryBy   string `json:"queryBy"`
+}
+
+func (u *Users) AddUser(user User) {
+	u.Users = append(u.Users, user)
 }
