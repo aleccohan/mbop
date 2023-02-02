@@ -56,12 +56,7 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		d, _ := json.Marshal(JWTResp{Pubkey: strings.TrimSuffix(string(pem), "\n")})
-		_, err = w.Write(d)
-		if err != nil {
-			http.Error(w, "failed to write response", http.StatusInternalServerError)
-			return
-		}
+		sendJSON(w, JWTResp{Pubkey: strings.TrimSuffix(string(pem), "\n")})
 	default:
 		CatchAll(w, r)
 	}
