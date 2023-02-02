@@ -35,14 +35,15 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 
 		bdata, err := io.ReadAll(resp.Body)
 		if err != nil {
-			http.Error(w, "could not read response", http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("could not read response: %v", err), http.StatusInternalServerError)
 			return
 		}
 
 		keys := jwk2pem.JWKeys{}
+		fmt.Println(keys)
 		err = json.Unmarshal([]byte(bdata), &keys)
 		if err != nil {
-			http.Error(w, "could not read response", http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("could not read response: %v", err), http.StatusInternalServerError)
 			return
 		}
 

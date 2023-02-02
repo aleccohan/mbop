@@ -16,31 +16,27 @@ import (
 
 type TestSuite struct {
 	suite.Suite
-	testDataStruct *jwk2pem.JWKeys
-	testData       []byte
 }
 
-func (suite *TestSuite) SetupTest() {
+func (suite *TestSuite) SetupSuite() {
+}
+
+func (suite *TestSuite) TestAwsJWTGetNoKid() {
 	testData, _ := os.ReadFile("testdata/jwt.json")
 	testDataStruct := &jwk2pem.JWKeys{}
 	err := json.Unmarshal([]byte(testData), testDataStruct)
 	assert.Nil(suite.T(), err, "error was not nil")
 
-	suite.testDataStruct = testDataStruct
-	suite.testData = testData
-
-	os.Setenv("JWT_MODULE", "aws")
-}
-
-func (suite *TestSuite) TestAwsJWTGetNoKid() {
-	suite.T().Skip()
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(suite.testData)
+		_, _ = w.Write(testData)
 	}))
 	defer mockServer.Close()
+
+	os.Setenv("JWT_MODULE", "aws")
 	os.Setenv("JWK_URL", fmt.Sprintf("%s/v1/jwt", mockServer.URL))
 
+	// dummy muxer for the test
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(JWTV1Handler))
 
@@ -53,44 +49,6 @@ func (suite *TestSuite) TestAwsJWTGetNoKid() {
 	assert.Nil(suite.T(), err, "error was not nil")
 	assert.Equal(suite.T(), 400, resp.StatusCode, "status code not good")
 	assert.Equal(suite.T(), "kid required to return correct pub key\n", string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
-
-	defer resp.Body.Close()
-}
-
-func (suite *TestSuite) TestAwsJWTGetNoKidMatch() {
-	suite.T().Skip()
-	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(JWTV1Handler))
-
-	sut := httptest.NewServer(mux)
-	defer sut.Close()
-
-	kid := "abc123"
-	resp, err := http.Get(fmt.Sprintf("%s/v1/jwt?kid=%s", sut.URL, kid))
-	b, _ := io.ReadAll(resp.Body)
-
-	assert.Nil(suite.T(), err, "error was not nil")
-	assert.Equal(suite.T(), 400, resp.StatusCode, "status code not good")
-	assert.Equal(suite.T(), fmt.Sprintf("no JWK for kid: %s\n", kid), string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
-
-	defer resp.Body.Close()
-}
-
-func (suite *TestSuite) TestAwsJWTGetPositiveKidMatch() {
-	suite.T().Skip()
-	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(JWTV1Handler))
-
-	sut := httptest.NewServer(mux)
-	defer sut.Close()
-
-	kid := "b4OUzJFABPSRwxX5VN7lYswVj9qoc3tet0tsfG5MSME"
-	resp, err := http.Get(fmt.Sprintf("%s/v1/jwt?kid=%s", sut.URL, kid))
-	b, _ := io.ReadAll(resp.Body)
-
-	assert.Nil(suite.T(), err, "error was not nil")
-	assert.Equal(suite.T(), 200, resp.StatusCode, "status code not good")
-	assert.Equal(suite.T(), "", string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
 
 	defer resp.Body.Close()
 }
