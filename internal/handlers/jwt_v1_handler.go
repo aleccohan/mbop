@@ -11,13 +11,13 @@ import (
 	l "github.com/redhatinsights/mbop/internal/logger"
 )
 
+type JWTResp struct {
+	Pubkey string `json:"pubkey"`
+}
+
 func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 	switch os.Getenv("JWT_MODULE") {
 	case "aws":
-		type JWTResp struct {
-			Pubkey string `json:"pubkey"`
-		}
-
 		kid := r.URL.Query().Get("kid")
 		if kid == "" {
 			do400(w, "kid required to return correct pub key")
