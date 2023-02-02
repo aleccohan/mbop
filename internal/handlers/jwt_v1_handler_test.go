@@ -16,25 +16,29 @@ import (
 
 type TestSuite struct {
 	suite.Suite
+	testData       []byte
+	testDataStruct *jwk2pem.JWKeys
+	mockServer     *httptest.Server
+	testPem        []byte
 }
 
 func (suite *TestSuite) SetupSuite() {
+	suite.testData, _ = os.ReadFile("testdata/jwks.json")
+	suite.testDataStruct = &jwk2pem.JWKeys{}
+	err := json.Unmarshal([]byte(suite.testData), suite.testDataStruct)
+	assert.Nil(suite.T(), err, "error was not nil")
+	suite.testPem, _ = os.ReadFile("testdata/pem.json")
 }
 
 func (suite *TestSuite) TestAwsJWTGetNoKid() {
-	testData, _ := os.ReadFile("testdata/jwks.json")
-	testDataStruct := &jwk2pem.JWKeys{}
-	err := json.Unmarshal([]byte(testData), testDataStruct)
-	assert.Nil(suite.T(), err, "error was not nil")
-
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	suite.mockServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(testData)
+		_, _ = w.Write(suite.testData)
 	}))
-	defer mockServer.Close()
+	defer suite.mockServer.Close()
 
 	os.Setenv("JWT_MODULE", "aws")
-	os.Setenv("JWK_URL", fmt.Sprintf("%s/v1/jwt", mockServer.URL))
+	os.Setenv("JWK_URL", fmt.Sprintf("%s/v1/jwt", suite.mockServer.URL))
 
 	// dummy muxer for the test
 	mux := http.NewServeMux()
@@ -54,14 +58,9 @@ func (suite *TestSuite) TestAwsJWTGetNoKid() {
 }
 
 func (suite *TestSuite) TestAwsJWTGetNoKidMatch() {
-	testData, _ := os.ReadFile("testdata/jwks.json")
-	testDataStruct := &jwk2pem.JWKeys{}
-	err := json.Unmarshal([]byte(testData), testDataStruct)
-	assert.Nil(suite.T(), err, "error was not nil")
-
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(testData)
+		_, _ = w.Write(suite.testData)
 	}))
 	defer mockServer.Close()
 
@@ -87,15 +86,9 @@ func (suite *TestSuite) TestAwsJWTGetNoKidMatch() {
 }
 
 func (suite *TestSuite) TestAwsJWTGetKidMatch() {
-	testData, _ := os.ReadFile("testdata/jwks.json")
-	testDataStruct := &jwk2pem.JWKeys{}
-	err := json.Unmarshal([]byte(testData), testDataStruct)
-	assert.Nil(suite.T(), err, "error was not nil")
-	testPem, _ := os.ReadFile("testdata/pem.json")
-
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(testData)
+		_, _ = w.Write(suite.testData)
 	}))
 	defer mockServer.Close()
 
@@ -115,7 +108,7 @@ func (suite *TestSuite) TestAwsJWTGetKidMatch() {
 
 	assert.Nil(suite.T(), err, "error was not nil")
 	assert.Equal(suite.T(), 200, resp.StatusCode, "status code not good")
-	assert.Equal(suite.T(), string(testPem), string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
+	assert.Equal(suite.T(), string(suite.testPem), string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
 
 	defer resp.Body.Close()
 }
