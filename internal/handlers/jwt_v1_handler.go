@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/RedHatInsights/jwk2pem"
 )
@@ -40,7 +41,6 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		keys := jwk2pem.JWKeys{}
-		fmt.Println(keys)
 		err = json.Unmarshal([]byte(bdata), &keys)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("could not read response: %v", err), http.StatusInternalServerError)
@@ -54,7 +54,7 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		d, _ := json.Marshal(JWTResp{Pubkey: string(pem)})
+		d, _ := json.Marshal(JWTResp{Pubkey: strings.TrimSuffix(string(pem), "\n")})
 		_, err = w.Write(d)
 		if err != nil {
 			http.Error(w, "failed to write response", http.StatusInternalServerError)
