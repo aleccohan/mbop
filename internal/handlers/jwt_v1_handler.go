@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/RedHatInsights/jwk2pem"
+	l "github.com/redhatinsights/mbop/internal/logger"
 )
 
 func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +20,7 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 
 		kid := r.URL.Query().Get("kid")
 		if kid == "" {
-			http.Error(w, "kid required to return correct pub key", http.StatusBadRequest)
+			do400(w, "kid required to return correct pub key")
 			return
 		}
 
@@ -28,7 +28,8 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 		resp, err := http.Get(jwkURL) //nolint
 
 		if err != nil {
-			http.Error(w, fmt.Sprintf("could not get JWKs: %s", err), http.StatusBadRequest)
+			l.Log.Error(err, "error getting JWKs")
+			do500(w, "error getting JWKs: "+err.Error())
 			return
 		}
 
@@ -36,21 +37,22 @@ func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
 
 		bdata, err := io.ReadAll(resp.Body)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("could not read response: %v", err), http.StatusInternalServerError)
+			l.Log.Error(err, "error reading JWKs")
+			do500(w, "error reading JWKs: "+err.Error())
 			return
 		}
 
 		keys := jwk2pem.JWKeys{}
 		err = json.Unmarshal([]byte(bdata), &keys)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("could not read response: %v", err), http.StatusInternalServerError)
+			do400(w, "failed to parse response: "+err.Error())
 			return
 		}
 
 		pem := jwk2pem.JWKsToPem(keys, kid)
 
 		if pem == nil {
-			http.Error(w, fmt.Sprintf("no JWK for kid: %v", kid), http.StatusNotFound)
+			do404(w, "no JWK for kid: "+kid)
 			return
 		}
 

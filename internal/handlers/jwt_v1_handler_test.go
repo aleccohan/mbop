@@ -52,7 +52,7 @@ func (suite *TestSuite) TestAwsJWTGetNoKid() {
 
 	assert.Nil(suite.T(), err, "error was not nil")
 	assert.Equal(suite.T(), 400, resp.StatusCode, "status code not good")
-	assert.Equal(suite.T(), "kid required to return correct pub key\n", string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
+	assert.Equal(suite.T(), "{\"message\":\"kid required to return correct pub key\"}", string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
 
 	defer resp.Body.Close()
 }
@@ -80,7 +80,7 @@ func (suite *TestSuite) TestAwsJWTGetNoKidMatch() {
 
 	assert.Nil(suite.T(), err, "error was not nil")
 	assert.Equal(suite.T(), 404, resp.StatusCode, "status code not good")
-	assert.Equal(suite.T(), "no JWK for kid: 123\n", string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
+	assert.Equal(suite.T(), "{\"message\":\"no JWK for kid: 123\"}", string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
 
 	defer resp.Body.Close()
 }
