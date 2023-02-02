@@ -30,9 +30,9 @@ objects:
         containers:
         - env:
           - name: JWK_URL
-            value: ${JWK_URL}
+            value: "${JWK_URL}"
           - name: JWT_MODULE
-            value: ${JWT_MODULE}
+            value: "${JWT_MODULE}"
           - name: KEYCLOAK_SERVER
             value: "${KEYCLOAK_SCHEME}://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}${KEYCLOAK_PATH}"
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
