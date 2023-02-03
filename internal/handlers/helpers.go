@@ -29,6 +29,10 @@ func do400(w http.ResponseWriter, msg string) {
 	doError(w, msg, 400)
 }
 
+func do404(w http.ResponseWriter, msg string) {
+	doError(w, msg, 404)
+}
+
 func doError(w http.ResponseWriter, msg string, code int) {
 	sendJSONWithStatusCode(w, newResponse(msg), code)
 }

@@ -12,6 +12,7 @@ func Status(w http.ResponseWriter, r *http.Request) {
 		ConfiguredModules: models.ConfiguredModules{
 			Users:  os.Getenv("USERS_MODULE"),
 			Mailer: os.Getenv("MAILER_MODULE"),
+			JWT:    os.Getenv("JWT_MODULE"),
 		},
 	}
 

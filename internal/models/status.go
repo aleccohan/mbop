@@ -9,6 +9,7 @@ type Status struct {
 type ConfiguredModules struct {
 	Users  string `json:"users"`
 	Mailer string `json:"mailer"`
+	JWT    string `json:"jwt"`
 }
 
 func (s *Status) ToJSON() []byte {

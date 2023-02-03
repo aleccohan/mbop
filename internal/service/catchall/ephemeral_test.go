@@ -1,7 +1,9 @@
 package catchall
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,6 +22,10 @@ func (suite *TestSuite) SetupSuite() {
 
 func (suite *TestSuite) TestJWTGet() {
 	testData, _ := os.ReadFile("testdata/jwt.json")
+	testDataStruct := &JSONStruct{}
+	err := json.Unmarshal([]byte(testData), testDataStruct)
+	assert.Nil(suite.T(), err, "error was not nil")
+
 	k8sServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/auth/realms/redhat-external/" {
 			w.WriteHeader(http.StatusOK)
@@ -40,9 +46,11 @@ func (suite *TestSuite) TestJWTGet() {
 	defer sut.Close()
 
 	resp, err := http.Get(fmt.Sprintf("%s/v1/jwt", sut.URL))
+	b, _ := io.ReadAll(resp.Body)
 
 	assert.Nil(suite.T(), err, "error was not nil")
 	assert.Equal(suite.T(), 200, resp.StatusCode, "status code not good")
+	assert.Equal(suite.T(), testDataStruct.PublicKey, string(b), fmt.Sprintf("expected body doesn't match: %v", string(b)))
 
 	defer resp.Body.Close()
 }
