@@ -33,3 +33,8 @@ func fetchWithDefault(name, defaultValue string) string {
 
 	return defaultValue
 }
+
+// TO BE USED FROM TESTING ONLY.
+func Reset() {
+	conf = nil
+}
