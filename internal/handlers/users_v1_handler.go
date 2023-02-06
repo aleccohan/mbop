@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"github.com/redhatinsights/mbop/internal/config"
 	"net/http"
-	"os"
 )
 
 func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
-	switch os.Getenv("USERS_MODULE") {
-	case "aws":
+	switch config.Get().UsersModule {
+	case awsModule:
 		// acctNum := chi.URLParam(r, "accountNumber")
 		// users, err := users.ListUsersV1(acctNum)
 		// ...
