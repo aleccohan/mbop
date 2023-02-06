@@ -11,6 +11,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zapr v1.2.3
+	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/openshift-online/ocm-sdk-go v0.1.311
 	github.com/stretchr/testify v1.7.1
 	go.uber.org/zap v1.21.0
@@ -46,7 +47,7 @@ require (
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/jwx v1.2.25 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.18 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
