@@ -8,6 +8,19 @@ name: Run Unit Tests
 jobs:
   testing:
     runs-on: ubuntu-20.04
+    services:
+      postgres:
+        image: docker.io/postgres:14
+        env:
+          POSTGRES_PASSWORD: toor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/setup-go@v2
         name: Set up golang 1.18
@@ -17,6 +30,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Run Tests
         run: go test ./...
+        env:
+          DATABASE_USER: postgres
+          DATABASE_PASSWORD: toor
+          DATABASE_HOST: localhost
+          DATABASE_NAME: postgres
       - uses: actions/setup-node@v3
         with:
           node-version: 18

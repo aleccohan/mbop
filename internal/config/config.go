@@ -12,6 +12,12 @@ type MbopConfig struct {
 	CognitoScope           string
 	OauthTokenURL          string
 	AmsURL                 string
+
+	DatabaseHost     string
+	DatabasePort     string
+	DatabaseUser     string
+	DatabasePassword string
+	DatabaseName     string
 }
 
 var conf *MbopConfig
@@ -32,6 +38,12 @@ func Get() *MbopConfig {
 	c.CognitoScope = fetchWithDefault("COGNITO_SCOPE", "")
 	c.OauthTokenURL = fetchWithDefault("OAUTH_TOKEN_URL", "")
 	c.AmsURL = fetchWithDefault("AMS_URL", "")
+
+	c.DatabaseHost = fetchWithDefault("DATABASE_HOST", "localhost")
+	c.DatabasePort = fetchWithDefault("DATABASE_PORT", "5432")
+	c.DatabaseUser = fetchWithDefault("DATABASE_USER", "postgres")
+	c.DatabasePassword = fetchWithDefault("DATABASE_PASSWORD", "")
+	c.DatabaseName = fetchWithDefault("DATABASE_NAME", "mbop")
 
 	conf = c
 	return conf
