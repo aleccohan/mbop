@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/redhatinsights/mbop/internal/config"
 	"net/http"
+
+	"github.com/redhatinsights/mbop/internal/config"
 )
 
 func UsersV1Handler(w http.ResponseWriter, r *http.Request) {

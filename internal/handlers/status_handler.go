@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/redhatinsights/mbop/internal/config"
 	"github.com/redhatinsights/mbop/internal/models"
-	"net/http"
 )
 
 func Status(w http.ResponseWriter, r *http.Request) {

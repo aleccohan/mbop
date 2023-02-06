@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/redhatinsights/mbop/internal/config"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/redhatinsights/mbop/internal/config"
 
 	"github.com/RedHatInsights/jwk2pem"
 	"github.com/stretchr/testify/assert"

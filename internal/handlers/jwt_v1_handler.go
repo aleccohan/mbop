@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/redhatinsights/mbop/internal/config"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/redhatinsights/mbop/internal/config"
 
 	"github.com/RedHatInsights/jwk2pem"
 	l "github.com/redhatinsights/mbop/internal/logger"

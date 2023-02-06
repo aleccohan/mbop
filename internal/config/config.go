@@ -2,21 +2,21 @@ package config
 
 import "os"
 
-type mbopConfig struct {
+type MbopConfig struct {
 	MailerModule string
 	JwtModule    string
 	JwkURL       string
 	UsersModule  string
 }
 
-var conf *mbopConfig
+var conf *MbopConfig
 
-func Get() *mbopConfig {
+func Get() *MbopConfig {
 	if conf != nil {
 		return conf
 	}
 
-	c := &mbopConfig{}
+	c := &MbopConfig{}
 	c.UsersModule = fetchWithDefault("USERS_MODULE", "")
 	c.JwtModule = fetchWithDefault("JWT_MODULE", "")
 	c.JwkURL = fetchWithDefault("JWK_URL", "")
