@@ -108,7 +108,7 @@ func (m *MBOPServer) findUsersBy(accountNo string, orgID string, adminOnly strin
 			found := false
 			for _, userCheck := range users.Users {
 				if queryBy == "userId" {
-					if strings.EqualFold(userCheck, strconv.Itoa(user.ID)) {
+					if strings.EqualFold(userCheck, user.ID) {
 						found = true
 					}
 				} else {
@@ -343,7 +343,7 @@ func (m *MBOPServer) getUsers() (users []models.User, err error) {
 
 		users = append(users, models.User{
 			Username:      user.Username,
-			ID:            ID,
+			ID:            strconv.Itoa(ID),
 			Email:         user.Email,
 			FirstName:     user.FirstName,
 			LastName:      user.LastName,
