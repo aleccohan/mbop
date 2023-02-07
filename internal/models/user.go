@@ -10,6 +10,7 @@ type User struct {
 	Email         string `json:"email"`
 	FirstName     string `json:"first_name"`
 	LastName      string `json:"last_name"`
+	AccountNumber string `json:"account_number"`
 	AddressString string `json:"address_string"`
 	IsActive      bool   `json:"is_active"`
 	IsOrgAdmin    bool   `json:"is_org_admin"`
@@ -17,6 +18,7 @@ type User struct {
 	Locale        string `json:"locale"`
 	OrgID         string `json:"org_id"`
 	DisplayName   string `json:"display_name"`
+	Entitlements  string `json:"entitlements"`
 	Type          string `json:"type"`
 }
 
