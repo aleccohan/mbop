@@ -18,7 +18,6 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 	switch config.Get().UsersModule {
 	case awsModule:
 		sdk := new(usersV1.OcmSDK)
-
 		q := initUserQuery(r)
 
 		if !stringInSlice(q.SortOrder, validSortOrder) {
