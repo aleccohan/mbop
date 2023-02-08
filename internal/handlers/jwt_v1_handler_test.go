@@ -9,6 +9,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/redhatinsights/mbop/internal/config"
+
 	"github.com/RedHatInsights/jwk2pem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -36,6 +38,7 @@ func (suite *TestSuite) TestAwsJWTGetNoKid() {
 		_, _ = w.Write(suite.testData)
 	}))
 	defer suite.mockServer.Close()
+	config.Reset()
 
 	os.Setenv("JWT_MODULE", "aws")
 	os.Setenv("JWK_URL", fmt.Sprintf("%s/v1/jwt", suite.mockServer.URL))
@@ -63,6 +66,7 @@ func (suite *TestSuite) TestAwsJWTGetNoKidMatch() {
 		_, _ = w.Write(suite.testData)
 	}))
 	defer mockServer.Close()
+	config.Reset()
 
 	os.Setenv("JWT_MODULE", "aws")
 	os.Setenv("JWK_URL", fmt.Sprintf("%s/v1/jwt", mockServer.URL))
@@ -91,6 +95,7 @@ func (suite *TestSuite) TestAwsJWTGetKidMatch() {
 		_, _ = w.Write(suite.testData)
 	}))
 	defer mockServer.Close()
+	config.Reset()
 
 	os.Setenv("JWT_MODULE", "aws")
 	os.Setenv("JWK_URL", fmt.Sprintf("%s/v1/jwt", mockServer.URL))

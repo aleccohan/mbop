@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"os"
 	"strings"
+
+	"github.com/redhatinsights/mbop/internal/config"
 
 	"github.com/RedHatInsights/jwk2pem"
 	l "github.com/redhatinsights/mbop/internal/logger"
@@ -16,17 +17,15 @@ type JWTResp struct {
 }
 
 func JWTV1Handler(w http.ResponseWriter, r *http.Request) {
-	switch os.Getenv("JWT_MODULE") {
-	case "aws":
+	switch config.Get().JwtModule {
+	case awsModule:
 		kid := r.URL.Query().Get("kid")
 		if kid == "" {
 			do400(w, "kid required to return correct pub key")
 			return
 		}
 
-		jwkURL := os.Getenv("JWK_URL")
-		resp, err := http.Get(jwkURL) //nolint
-
+		resp, err := http.Get(config.Get().JwkURL)
 		if err != nil {
 			l.Log.Error(err, "error getting JWKs")
 			do500(w, "error getting JWKs: "+err.Error())

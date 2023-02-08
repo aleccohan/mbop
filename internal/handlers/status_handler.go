@@ -2,19 +2,19 @@ package handlers
 
 import (
 	"net/http"
-	"os"
 
+	"github.com/redhatinsights/mbop/internal/config"
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
 func Status(w http.ResponseWriter, r *http.Request) {
 	status := models.Status{
 		ConfiguredModules: models.ConfiguredModules{
-			Users:  os.Getenv("USERS_MODULE"),
-			Mailer: os.Getenv("MAILER_MODULE"),
-			JWT:    os.Getenv("JWT_MODULE"),
+			Users:  config.Get().UsersModule,
+			Mailer: config.Get().MailerModule,
+			JWT:    config.Get().JwtModule,
 		},
 	}
 
-	_, _ = w.Write(status.ToJSON())
+	sendJSON(w, status)
 }
