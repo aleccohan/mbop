@@ -39,6 +39,20 @@ func ResponseToUsers(response *v1.AccountsListResponse, connection *sdk.Connecti
 	return users, nil
 }
 
+func CreateSearchString(usernames models.UserBody) string {
+	search := ""
+
+	for i := range usernames.Users {
+		if i > 0 {
+			search += " and "
+		}
+
+		search += fmt.Sprint("username='%s'", usernames.Users[i])
+	}
+
+	return search
+}
+
 func isOrgAdmin(connection *sdk.Connection, id string) (bool, error) {
 	search := fmt.Sprintf("account.id='%s' and role.id='OrganizationAdmin'", id)
 
