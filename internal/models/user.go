@@ -27,6 +27,10 @@ type UserQuery struct {
 	QueryBy   string `json:"queryBy"`
 }
 
+type UserBody struct {
+	Users []string `json:"users"`
+}
+
 func (u *Users) AddUser(user User) {
 	u.Users = append(u.Users, user)
 }
