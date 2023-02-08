@@ -69,6 +69,38 @@ objects:
                 optional: true
           - name: MAILER_MODULE
             value: "${MAILER_MODULE}"
+          - name: DATABASE_HOST
+            valueFrom:
+              secretKeyRef:
+                name: mbop-db
+                key: db.host
+                optional: true
+          - name: DATABASE_PORT
+            valueFrom:
+              secretKeyRef:
+                name: mbop-db
+                key: db.port
+                optional: true
+          - name: DATABASE_USER
+            valueFrom:
+              secretKeyRef:
+                name: mbop-db
+                key: db.user
+                optional: true
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mbop-db
+                key: db.password
+                optional: true
+          - name: DATABASE_NAME
+            valueFrom:
+              secretKeyRef:
+                name: mbop-db
+                key: db.name
+                optional: true
+          - name: STORE_BACKEND
+            value: ${STORE_BACKEND}
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           name: mbop
@@ -151,3 +183,6 @@ parameters:
 - name: MAILER_MODULE
   description: which module to use to send emails
   value: "print"
+- name: STORE_BACKEND
+  description: which store to use for satellite registrations
+  value: "memory"
