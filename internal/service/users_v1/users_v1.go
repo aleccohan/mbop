@@ -47,7 +47,7 @@ func CreateSearchString(usernames models.UserBody) string {
 			search += " and "
 		}
 
-		search += fmt.Sprint("username='%s'", usernames.Users[i])
+		search += fmt.Sprintf("username='%s'", usernames.Users[i])
 	}
 
 	return search
