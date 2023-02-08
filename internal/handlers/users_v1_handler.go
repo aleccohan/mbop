@@ -6,7 +6,6 @@ import (
 
 	"github.com/redhatinsights/mbop/internal/config"
 
-	"os"
 	"strings"
 
 	"github.com/redhatinsights/mbop/internal/models"
@@ -18,7 +17,6 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 
 	switch config.Get().UsersModule {
 	case awsModule:
-		ctx := context.Background()
 		sdk := new(usersV1.OcmSDK)
 
 		q := initUserQuery(r)
