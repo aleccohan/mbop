@@ -24,7 +24,7 @@ func (ocm *OcmSDK) InitSdkConnection(ctx context.Context) (*sdk.Connection, erro
 		Logger(logger).
 
 		// SA Auth:
-		Client(os.Getenv("AWS_CLIENT_ID"), os.Getenv("AWS_CLIENT_SECRET")).
+		Client(os.Getenv("COGNITO_APP_CLIENT_ID"), os.Getenv("COGNITO_APP_CLIENT_SECRET")).
 
 		// Offline Token Auth:
 		// Tokens(<token>).
