@@ -2,13 +2,9 @@ package store
 
 import (
 	"database/sql"
-	"fmt"
 	"testing"
 
-	"github.com/golang-migrate/migrate/v4/database/pgx"
-	"github.com/redhatinsights/mbop/internal/config"
 	l "github.com/redhatinsights/mbop/internal/logger"
-	"github.com/redhatinsights/mbop/internal/store/migrations"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -19,34 +15,13 @@ type TestSuite struct {
 }
 
 func (suite *TestSuite) SetupSuite() {
-	c := config.Get()
 	_ = l.Init()
-
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		c.DatabaseUser, c.DatabasePassword, c.DatabaseHost, c.DatabasePort, c.DatabaseName)
-
-	var err error
-	suite.db, err = sql.Open("pgx", connStr)
+	store, err := setupPostgresStore()
 	if err != nil {
-		suite.FailNow("Failed to connect to database", "%v", err)
+		suite.FailNow("Failed to get postgres store", "%v", err)
 	}
-
-	err = suite.db.Ping()
-	if err != nil {
-		suite.FailNow("failed to ping db", "%v", err)
-	}
-
-	suite.store = &PostgresStore{db: suite.db}
-
-	driver, err := pgx.WithInstance(suite.db, &pgx.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	err = migrations.Migrate(driver)
-	if err != nil {
-		panic(err)
-	}
+	suite.db = store.db
+	suite.store = store
 }
 
 func (suite *TestSuite) TearDownSuite() {

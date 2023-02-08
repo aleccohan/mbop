@@ -11,10 +11,15 @@ import (
 	"github.com/redhatinsights/mbop/internal/handlers"
 	l "github.com/redhatinsights/mbop/internal/logger"
 	"github.com/redhatinsights/mbop/internal/middleware"
+	"github.com/redhatinsights/mbop/internal/store"
 )
 
 func main() {
 	if err := l.Init(); err != nil {
+		panic(err)
+	}
+
+	if err := store.SetupStore(); err != nil {
 		panic(err)
 	}
 

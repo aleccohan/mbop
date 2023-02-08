@@ -9,11 +9,11 @@ import (
 	l "github.com/redhatinsights/mbop/internal/logger"
 )
 
-type PostgresStore struct {
+type postgresStore struct {
 	db *sql.DB
 }
 
-func (p *PostgresStore) All() ([]Registration, error) {
+func (p *postgresStore) All() ([]Registration, error) {
 	rows, err := p.db.Query(`select id, org_id, uid, extra from registrations`)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (p *PostgresStore) All() ([]Registration, error) {
 	return out, nil
 }
 
-func (p *PostgresStore) Find(orgID, uid string) (*Registration, error) {
+func (p *postgresStore) Find(orgID, uid string) (*Registration, error) {
 	rows := p.db.QueryRow(
 		`select id, org_id, uid, extra from registrations where org_id = $1 or uid = $2 limit 1`,
 		orgID,
@@ -41,7 +41,7 @@ func (p *PostgresStore) Find(orgID, uid string) (*Registration, error) {
 	return scanRegistration(rows)
 }
 
-func (p *PostgresStore) Create(r *Registration) (string, error) {
+func (p *postgresStore) Create(r *Registration) (string, error) {
 	res := p.db.QueryRow(
 		`insert into registrations (org_id, uid, extra) values ($1, $2, $3) returning id`,
 		r.OrgID,
@@ -59,7 +59,7 @@ func (p *PostgresStore) Create(r *Registration) (string, error) {
 	return id, nil
 }
 
-func (p *PostgresStore) Update(r *Registration, update *RegistrationUpdate) error {
+func (p *postgresStore) Update(r *Registration, update *RegistrationUpdate) error {
 	//TODO: maybe more fields someday, not sure.
 	_, err := p.db.Exec(
 		`update registrations set extra = $1 where org_id = $2 and uid = $3`,
@@ -71,7 +71,7 @@ func (p *PostgresStore) Update(r *Registration, update *RegistrationUpdate) erro
 	return err
 }
 
-func (p *PostgresStore) Delete(orgID, uid string) error {
+func (p *postgresStore) Delete(orgID, uid string) error {
 	res, err := p.db.Exec(
 		`delete from registrations where org_id = $1 and uid = $2`,
 		orgID,

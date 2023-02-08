@@ -13,6 +13,7 @@ type MbopConfig struct {
 	OauthTokenURL          string
 	AmsURL                 string
 
+	StoreBackend     string
 	DatabaseHost     string
 	DatabasePort     string
 	DatabaseUser     string
@@ -38,6 +39,7 @@ func Get() *MbopConfig {
 		DatabaseUser:     fetchWithDefault("DATABASE_USER", "postgres"),
 		DatabasePassword: fetchWithDefault("DATABASE_PASSWORD", ""),
 		DatabaseName:     fetchWithDefault("DATABASE_NAME", "mbop"),
+		StoreBackend:     fetchWithDefault("STORE_BACKEND", "memory"),
 
 		CognitoAppClientID:     fetchWithDefault("COGNITO_APP_CLIENT_ID", ""),
 		CognitoAppClientSecret: fetchWithDefault("COGNITO_APP_CLIENT_SECRET", ""),
