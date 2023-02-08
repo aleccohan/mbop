@@ -51,7 +51,7 @@ func isOrgAdmin(connection *sdk.Connection, id string) (bool, error) {
 
 	if roleBindings.Items().Empty() {
 		return false, err
-	} else {
-		return true, err
 	}
+
+	return true, err
 }

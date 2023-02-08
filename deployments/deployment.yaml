@@ -35,12 +35,12 @@ objects:
             value: "${JWT_MODULE}"
           - name: KEYCLOAK_SERVER
             value: "${KEYCLOAK_SCHEME}://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}${KEYCLOAK_PATH}"
-          - name: AWS_CLIENT_ID
+          - name: COGNITO_APP_CLIENT_ID
             valueFrom:
               secretKeyRef:
                 name: CHANGEME
                 key: CHANGEME
-          - name: AWS_CLIENT_SECRET
+          - name: COGNITO_APP_CLIENT_SECRET
             valueFrom:
               secretKeyRef:
                 name: CHANGEME
