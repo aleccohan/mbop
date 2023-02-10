@@ -83,11 +83,11 @@ func (ocm *SDK) IsOrgAdmin(id string) (bool, error) {
 		return false, err
 	}
 
-	if roleBindings.Items().Empty() {
-		return false, err
+	if !roleBindings.Items().Empty() {
+		return true, err
 	}
 
-	return true, err
+	return false, err
 }
 
 func (ocm *SDK) CloseSdkConnection() {
