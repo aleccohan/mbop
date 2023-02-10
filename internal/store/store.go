@@ -11,7 +11,10 @@ import (
 
 // GetStore is a function that will return the currently configured store. this
 // allows it to be overridden for testing or alternative implementations
-var GetStore func() (Store, error)
+var GetStore func() Store
+
+// persistent ref to an in-memory store if present
+var mem Store
 
 func SetupStore() error {
 	switch config.Get().StoreBackend {
@@ -21,9 +24,10 @@ func SetupStore() error {
 			return err
 		}
 
-		GetStore = func() (Store, error) { return pgStore, nil }
+		GetStore = func() Store { return pgStore }
 	case "memory":
-		GetStore = func() (Store, error) { return &inMemoryStore{}, nil }
+		mem = &inMemoryStore{}
+		GetStore = func() Store { return mem }
 	}
 
 	return nil
