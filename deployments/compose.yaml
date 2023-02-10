@@ -10,6 +10,8 @@ services:
       KEYCLOAK_SERVER: http://keycloak:8080
       KEYCLOAK_USERNAME: admin
       KEYCLOAK_PASSWORD: change_me
+      USERS_MODULE: aws
+      OCM_MODULE: aws
 
   keycloak:
     image: quay.io/keycloak/keycloak:${KEYCLOAK_IMAGE_TAG:-15.0.2}

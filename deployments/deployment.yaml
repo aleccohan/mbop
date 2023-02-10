@@ -37,6 +37,26 @@ objects:
             value: "${KEYCLOAK_SCHEME}://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}${KEYCLOAK_PATH}"
           - name: PORT
             value: "${PORT}"
+          - name: COGNITO_APP_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: CHANGEME
+                key: CHANGEME
+          - name: COGNITO_APP_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: CHANGEME
+                key: CHANGEME
+          - name: TOKEN_URL
+            value: ${TOKEN_URL}
+          - name: OAUTH_TOKEN_URL
+            value: ${OAUTH_TOKEN_URL}
+          - name: AMS_URL
+            value: ${AMS_URL}
+          - name: COGNITO_SCOPE
+            value: ${COGNITO_SCOPE}
+          - name: OCM_MODULE
+            value: ${OCM_MODULE}
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           name: mbop
@@ -103,13 +123,10 @@ parameters:
   value: ""
 - name: JWK_URL
   description: optional JWK endpoint for use in JWT_MODULE implementations
-- name: CLIENT_ID
-  description: cognito client id
-  value: ""
-- name: CLIENT_SECRET
-  description: cognito client secret
   value: ""
 - name: TOKEN_URL
+  description: Activation token URL
+  value: ""
 - name: OAUTH_TOKEN_URL
   description: AMS token url
   value: ""
@@ -118,4 +135,7 @@ parameters:
   value: ""
 - name: COGNITO_SCOPE
   description: cognito scope value
+  value: ""
+- name: OCM_MODULE
+  description: optional OCM module override
   value: ""
