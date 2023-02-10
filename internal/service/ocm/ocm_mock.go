@@ -7,13 +7,13 @@ import (
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
-type OcmSDKMock struct{}
+type SDKMock struct{}
 
-func (ocm *OcmSDKMock) InitSdkConnection(ctx context.Context) error {
+func (ocm *SDKMock) InitSdkConnection(ctx context.Context) error {
 	return nil
 }
 
-func (ocm *OcmSDKMock) GetUsers(usernames models.UserBody, q models.UserQuery) (models.Users, error) {
+func (ocm *SDKMock) GetUsers(usernames models.UserBody, q models.UserQuery) (models.Users, error) {
 	var users models.Users
 
 	if usernames.Users == nil {
@@ -60,7 +60,7 @@ func (ocm *OcmSDKMock) GetUsers(usernames models.UserBody, q models.UserQuery) (
 	return users, nil
 }
 
-func (ocm *OcmSDKMock) IsOrgAdmin(id string) (bool, error) {
+func (ocm *SDKMock) IsOrgAdmin(id string) (bool, error) {
 	if id == "23456" {
 		return false, nil
 	}
@@ -72,6 +72,6 @@ func (ocm *OcmSDKMock) IsOrgAdmin(id string) (bool, error) {
 	return true, nil
 }
 
-func (ocm *OcmSDKMock) CloseSdkConnection() {
+func (ocm *SDKMock) CloseSdkConnection() {
 	// nil
 }

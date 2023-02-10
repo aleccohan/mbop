@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/redhatinsights/mbop/internal/config"
+	"github.com/redhatinsights/mbop/internal/service/ocm"
 
 	"github.com/redhatinsights/mbop/internal/models"
-	"github.com/redhatinsights/mbop/internal/service/ocm"
 )
 
 func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
