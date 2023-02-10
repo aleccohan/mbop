@@ -45,8 +45,6 @@ objects:
               secretKeyRef:
                 name: ocm-app-client
                 key: client_secret
-          - name: TOKEN_URL
-            value: ${TOKEN_URL}
           - name: OAUTH_TOKEN_URL
             value: ${OAUTH_TOKEN_URL}
           - name: AMS_URL
@@ -121,9 +119,6 @@ parameters:
   value: ""
 - name: JWK_URL
   description: optional JWK endpoint for use in JWT_MODULE implementations
-  value: ""
-- name: TOKEN_URL
-  description: Activation token URL
   value: ""
 - name: OAUTH_TOKEN_URL
   description: AMS token url
