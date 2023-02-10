@@ -8,10 +8,8 @@ import (
 
 	"github.com/redhatinsights/mbop/internal/config"
 
-	"strings"
-
 	"github.com/redhatinsights/mbop/internal/models"
-	usersV1 "github.com/redhatinsights/mbop/internal/service/users_v1"
+	"github.com/redhatinsights/mbop/internal/service/ocm"
 )
 
 func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
@@ -19,8 +17,6 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 
 	switch config.Get().UsersModule {
 	case awsModule:
-		sdk := new(usersV1.OcmSDK)
-
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			do500(w, "failed to read request body: "+err.Error())
@@ -35,53 +31,51 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		q := initUserQuery(r)
-		if !stringInSlice(q.SortOrder, validSortOrder) {
-			do400(w, "sortOrder must be one of "+strings.Join(validSortOrder, ", "))
+		q, err := initUserQuery(r)
+
+		if err != nil {
+			do400(w, err.Error())
 			return
 		}
 
-		if !stringInSlice(q.QueryBy, validQueryBy) {
-			do400(w, "queryBy must be one of "+strings.Join(validQueryBy, ", "))
+		// Create new SDK client
+		client, err := ocm.NewOcmClient()
+
+		if err != nil {
+			do400(w, err.Error())
 			return
 		}
 
-		connection, err := sdk.InitSdkConnection(ctx)
+		err = client.InitSdkConnection(ctx)
 
 		if err != nil {
 			do500(w, "Can't build connection: "+err.Error())
 			return
 		}
 
-		// Get list of Accounts
-		search := usersV1.CreateSearchString(usernames)
-		collection := connection.AccountsMgmt().V1().Accounts().List().Search(search)
+		u, err := client.GetUsers(usernames, q)
 
-		collection = addQueryOrder(collection, q)
-		// Add place here to add usernames into search
-
-		accountsGetResponse, err := collection.Send()
 		if err != nil {
 			do500(w, "Cant Retrieve Accounts: "+err.Error())
 			return
 		}
 
-		users := models.Users{}
-		if accountsGetResponse.Items().Empty() {
-			sendJSON(w, users)
-		}
+		// For each user see if it's an org_admin
+		for i := range u.Users {
+			isOrgAdmin, err := client.IsOrgAdmin(u.Users[i].ID)
 
-		users, err = usersV1.ResponseToUsers(accountsGetResponse, connection)
+			if err != nil {
+				do500(w, "Cant Retrieve Role Bindings: "+err.Error())
+				return
+			}
 
-		if err != nil {
-			do500(w, "Cant Retrieve Role Bindings: "+err.Error())
-			return
+			u.Users[i].IsOrgAdmin = isOrgAdmin
 		}
 
 		// Close SDK Connection
-		sdk.CloseSdkConnection(connection)
+		client.CloseSdkConnection()
 
-		sendJSON(w, users)
+		sendJSON(w, u.Users)
 	default:
 		// mbop server instance injected somewhere
 		// pass right through to the current handler

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
-	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	l "github.com/redhatinsights/mbop/internal/logger"
 	"github.com/redhatinsights/mbop/internal/models"
 )
@@ -54,37 +54,31 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func initUserQuery(r *http.Request) models.UserQuery {
+func initUserQuery(r *http.Request) (models.UserQuery, error) {
 	q := models.UserQuery{}
 
-	if r.URL.Query().Get("sortOrder") != "" || stringInSlice(r.URL.Query().Get("sortOrder"), validSortOrder) {
-		q.SortOrder = r.URL.Query().Get("sortOrder")
+	if r.URL.Query().Get("sortOrder") == "" || stringInSlice(r.URL.Query().Get("sortOrder"), validSortOrder) {
+		if r.URL.Query().Get("sortOrder") == validSortOrder[1] {
+			q.SortOrder = "desc"
+		} else {
+			q.SortOrder = r.URL.Query().Get("sortOrder")
+		}
+	} else {
+		return q, fmt.Errorf("sortOrder must be one of '', " + strings.Join(validSortOrder, ", "))
 	}
 
-	if r.URL.Query().Get("queryBy") != "" || stringInSlice(r.URL.Query().Get("queryBy"), validQueryBy) {
+	if r.URL.Query().Get("queryBy") == "" || stringInSlice(r.URL.Query().Get("queryBy"), validQueryBy) {
 		// Translate bop parameters into AMS parameters
 		if r.URL.Query().Get("queryBy") == validQueryBy[0] {
 			q.QueryBy = "id"
 		}
 
 		if r.URL.Query().Get("queryBy") == validQueryBy[1] {
-			q.QueryBy = "org_id"
+			q.QueryBy = "organizationId"
 		}
+	} else {
+		return q, fmt.Errorf("queryBy must be one of " + strings.Join(validQueryBy, ", "))
 	}
 
-	return q
-}
-
-func addQueryOrder(collection *v1.AccountsListRequest, q models.UserQuery) *v1.AccountsListRequest {
-	order := ""
-
-	if q.QueryBy != "" {
-		order += q.QueryBy
-	}
-
-	if q.SortOrder != "" {
-		order += fmt.Sprint(" " + q.SortOrder)
-	}
-
-	return collection.Order(order)
+	return q, nil
 }
