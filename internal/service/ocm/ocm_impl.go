@@ -123,10 +123,10 @@ func createSearchString(usernames models.UserBody) string {
 
 	for i := range usernames.Users {
 		if i > 0 {
-			search = search + " or "
+			search += " or "
 		}
 
-		search = search + fmt.Sprintf("username='%s'", usernames.Users[i])
+		search += fmt.Sprintf("username='%s'", usernames.Users[i])
 	}
 
 	return search
