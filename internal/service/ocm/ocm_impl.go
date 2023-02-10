@@ -11,11 +11,11 @@ import (
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
-type OcmSDK struct {
+type SDK struct {
 	client *sdk.Connection
 }
 
-func (ocm *OcmSDK) InitSdkConnection(ctx context.Context) error {
+func (ocm *SDK) InitSdkConnection(ctx context.Context) error {
 	// Create a logger that has the debug level enabled:
 	logger, err := logging.NewGoLoggerBuilder().
 		Debug(true).
@@ -51,7 +51,7 @@ func (ocm *OcmSDK) InitSdkConnection(ctx context.Context) error {
 	return nil
 }
 
-func (ocm *OcmSDK) GetUsers(usernames models.UserBody, q models.UserQuery) (models.Users, error) {
+func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserQuery) (models.Users, error) {
 	search := createSearchString(usernames)
 	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
 
@@ -73,7 +73,7 @@ func (ocm *OcmSDK) GetUsers(usernames models.UserBody, q models.UserQuery) (mode
 	return users, err
 }
 
-func (ocm *OcmSDK) IsOrgAdmin(id string) (bool, error) {
+func (ocm *SDK) IsOrgAdmin(id string) (bool, error) {
 	search := fmt.Sprintf("account.id='%s' and role.id='OrganizationAdmin'", id)
 
 	collection := ocm.client.AccountsMgmt().V1().RoleBindings()
@@ -90,7 +90,7 @@ func (ocm *OcmSDK) IsOrgAdmin(id string) (bool, error) {
 	return true, err
 }
 
-func (ocm *OcmSDK) CloseSdkConnection() {
+func (ocm *SDK) CloseSdkConnection() {
 	ocm.client.Close()
 }
 

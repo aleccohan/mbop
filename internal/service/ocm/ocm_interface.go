@@ -21,9 +21,9 @@ func NewOcmClient() (OCM, error) {
 	mod := os.Getenv("OCM_MODULE")
 	switch mod {
 	case "aws":
-		client = &OcmSDK{}
+		client = &SDK{}
 	case "mock":
-		client = &OcmSDKMock{}
+		client = &SDKMock{}
 	default:
 		return nil, fmt.Errorf("unsupported ocm module %q", mod)
 	}
