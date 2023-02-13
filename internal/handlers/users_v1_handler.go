@@ -61,15 +61,20 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// For each user see if it's an org_admin
-		for i := range u.Users {
-			isOrgAdmin, err := client.IsOrgAdmin(u.Users[i].ID)
+		isOrgAdmin, err := client.GetOrgAdmin(u.Users)
 
-			if err != nil {
-				do500(w, "Cant Retrieve Role Bindings: "+err.Error())
-				return
+		if err != nil {
+			do500(w, "Cant Retrieve Role Bindings: "+err.Error())
+			return
+		}
+
+		for i, user := range u.Users {
+			response, ok := isOrgAdmin[user.ID]
+			if ok {
+				u.Users[i].IsOrgAdmin = response.IsOrgAdmin
+			} else {
+				user.IsOrgAdmin = false
 			}
-
-			u.Users[i].IsOrgAdmin = isOrgAdmin
 		}
 
 		// Close SDK Connection

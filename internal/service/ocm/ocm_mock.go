@@ -60,16 +60,25 @@ func (ocm *SDKMock) GetUsers(usernames models.UserBody, q models.UserQuery) (mod
 	return users, nil
 }
 
-func (ocm *SDKMock) IsOrgAdmin(id string) (bool, error) {
-	if id == "23456" {
-		return false, nil
+func (ocm *SDKMock) GetOrgAdmin(users []models.User) (models.OrgAdminResponse, error) {
+	response := models.OrgAdminResponse{}
+
+	if users[0].ID == "23456" {
+		return response, nil
 	}
 
-	if id == "errorTest" {
-		return false, fmt.Errorf("error retrieving Role Bindings")
+	if users[0].ID == "errorTest" {
+		return response, fmt.Errorf("error retrieving Role Bindings")
 	}
 
-	return true, nil
+	response = models.OrgAdminResponse{
+		"12345": models.OrgAdmin{
+			ID:         "12345",
+			IsOrgAdmin: true,
+		},
+	}
+
+	return response, nil
 }
 
 func (ocm *SDKMock) CloseSdkConnection() {

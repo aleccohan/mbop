@@ -12,7 +12,7 @@ type OCM interface {
 	InitSdkConnection(ctx context.Context) error
 	CloseSdkConnection()
 	GetUsers(users models.UserBody, q models.UserQuery) (models.Users, error)
-	IsOrgAdmin(id string) (bool, error)
+	GetOrgAdmin([]models.User) (models.OrgAdminResponse, error)
 }
 
 func NewOcmClient() (OCM, error) {
