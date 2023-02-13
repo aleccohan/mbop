@@ -73,21 +73,30 @@ func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserQuery) (models.
 	return users, err
 }
 
-func (ocm *SDK) IsOrgAdmin(id string) (bool, error) {
-	search := fmt.Sprintf("account.id='%s' and role.id='OrganizationAdmin'", id)
+func (ocm *SDK) GetOrgAdmin(u []models.User) (models.OrgAdminResponse, error) {
+	search := createOrgAdminSearchString(u)
 
 	collection := ocm.client.AccountsMgmt().V1().RoleBindings()
 	roleBindings, err := collection.List().Search(search).Send()
 
+	orgAdminResponse := models.OrgAdminResponse{}
 	if err != nil {
-		return false, err
+		return orgAdminResponse, err
 	}
 
-	if !roleBindings.Items().Empty() {
-		return true, err
+	if roleBindings.Items().Empty() {
+		return orgAdminResponse, err
 	}
 
-	return false, err
+	bindingSlice := roleBindings.Items().Slice()
+	for _, binding := range bindingSlice {
+		orgAdminResponse[binding.Account().ID()] = models.OrgAdmin{
+			ID:         binding.Account().ID(),
+			IsOrgAdmin: true,
+		}
+	}
+
+	return orgAdminResponse, err
 }
 
 func (ocm *SDK) CloseSdkConnection() {
@@ -127,6 +136,20 @@ func createSearchString(usernames models.UserBody) string {
 		}
 
 		search += fmt.Sprintf("username='%s'", usernames.Users[i])
+	}
+
+	return search
+}
+
+func createOrgAdminSearchString(users []models.User) string {
+	search := ""
+
+	for i := range users {
+		if i > 0 {
+			search += " or "
+		}
+
+		search += fmt.Sprintf("account.id='%s' and role.id='OrganizationAdmin'", users[i].ID)
 	}
 
 	return search
