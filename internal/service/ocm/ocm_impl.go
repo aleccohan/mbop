@@ -59,7 +59,6 @@ func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserQuery) (models.
 
 	users := models.Users{}
 	usersResponse, err := collection.Send()
-
 	if err != nil {
 		return users, err
 	}

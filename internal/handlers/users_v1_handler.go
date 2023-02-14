@@ -32,7 +32,6 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		q, err := initUserQuery(r)
-
 		if err != nil {
 			do400(w, err.Error())
 			return
@@ -40,21 +39,18 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 
 		// Create new SDK client
 		client, err := ocm.NewOcmClient()
-
 		if err != nil {
 			do400(w, err.Error())
 			return
 		}
 
 		err = client.InitSdkConnection(ctx)
-
 		if err != nil {
 			do500(w, "Can't build connection: "+err.Error())
 			return
 		}
 
 		u, err := client.GetUsers(usernames, q)
-
 		if err != nil {
 			do500(w, "Cant Retrieve Accounts: "+err.Error())
 			return
@@ -62,7 +58,6 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 
 		// For each user see if it's an org_admin
 		isOrgAdmin, err := client.GetOrgAdmin(u.Users)
-
 		if err != nil {
 			do500(w, "Cant Retrieve Role Bindings: "+err.Error())
 			return
