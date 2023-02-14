@@ -3,11 +3,11 @@ package ocm
 import (
 	"context"
 	"fmt"
-	"os"
 
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/openshift-online/ocm-sdk-go/logging"
+	"github.com/redhatinsights/mbop/internal/config"
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
@@ -29,19 +29,19 @@ func (ocm *SDK) InitSdkConnection(ctx context.Context) error {
 		Logger(logger).
 
 		// SA Auth:
-		Client(os.Getenv("COGNITO_APP_CLIENT_ID"), os.Getenv("COGNITO_APP_CLIENT_SECRET")).
+		Client(config.Get().CognitoAppClientID, config.Get().CognitoAppClientSecret).
 
 		// Offline Token Auth:
 		// Tokens(<token>).
 
 		// Oauth Token URL:
-		TokenURL(os.Getenv("OAUTH_TOKEN_URL")).
+		TokenURL(config.Get().OauthTokenURL).
 
 		// Route to hit for AMS:
-		URL(os.Getenv("AMS_URL")).
+		URL(config.Get().AmsURL).
 
 		// SA Scopes:
-		Scopes(os.Getenv("COGNITO_SCOPE")).
+		Scopes(config.Get().CognitoScope).
 		BuildContext(ctx)
 
 	if err != nil {
