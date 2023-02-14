@@ -51,8 +51,8 @@ objects:
             value: ${AMS_URL}
           - name: COGNITO_SCOPE
             value: ${COGNITO_SCOPE}
-          - name: OCM_MODULE
-            value: ${OCM_MODULE}
+          - name: USERS_MODULE
+            value: ${USERS_MODULE}
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           name: mbop
@@ -129,6 +129,6 @@ parameters:
 - name: COGNITO_SCOPE
   description: cognito scope value
   value: ""
-- name: OCM_MODULE
-  description: optional OCM module override
+- name: USERS_MODULE
+  description: optional USERS module override
   value: ""
