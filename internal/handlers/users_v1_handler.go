@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -13,7 +12,7 @@ import (
 )
 
 func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	ctx := r.Context()
 
 	switch config.Get().UsersModule {
 	case amsModule:
