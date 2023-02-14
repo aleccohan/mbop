@@ -16,7 +16,7 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	switch config.Get().UsersModule {
-	case awsModule:
+	case amsModule:
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			do500(w, "failed to read request body: "+err.Error())
@@ -27,7 +27,7 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 		var usernames models.UserBody
 		err = json.Unmarshal(body, &usernames)
 		if err != nil {
-			do400(w, "failed to parse request body: "+err.Error())
+			do400(w, "failed to parse request body: "+err.Error()+", request must include 'usernames': [] ")
 			return
 		}
 
