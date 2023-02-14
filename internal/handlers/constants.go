@@ -5,3 +5,4 @@ Constants used throughout the handlers package, will probably mostly be module d
 */
 
 const awsModule = "aws"
+const amsModule = "ams"

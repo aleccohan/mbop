@@ -21,6 +21,7 @@ func Get() *MbopConfig {
 	c.JwtModule = fetchWithDefault("JWT_MODULE", "")
 	c.JwkURL = fetchWithDefault("JWK_URL", "")
 	c.MailerModule = fetchWithDefault("MAILER_MODULE", "print")
+	c.UsersModule = fetchWithDefault("USERS_MODULE", "")
 
 	conf = c
 	return conf
