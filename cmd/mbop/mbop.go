@@ -41,6 +41,6 @@ func main() {
 
 	l.Log.Info("Starting MBOP Server on", "port", port)
 	if err := srv.ListenAndServe(); err != nil {
-		l.Log.Error(err, "reason", "server couldn't start")
+		l.Log.Error(err, "server couldn't start")
 	}
 }
