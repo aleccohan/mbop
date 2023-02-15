@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -27,13 +28,18 @@ func main() {
 	r.Get("/api/entitlements*", handlers.CatchAll)
 	r.Get("/v1/jwt", handlers.JWTV1Handler)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8090"
+	}
+
 	srv := http.Server{
-		Addr:              ":8090",
+		Addr:              ":" + port,
 		ReadHeaderTimeout: 2 * time.Second,
 		Handler:           r,
 	}
 
-	l.Log.Info("Starting MBOP Server on :8090")
+	l.Log.Info("Starting MBOP Server on", "port", port)
 	if err := srv.ListenAndServe(); err != nil {
 		l.Log.Error(err, "reason", "server couldn't start")
 	}

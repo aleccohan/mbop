@@ -35,6 +35,8 @@ objects:
             value: "${JWT_MODULE}"
           - name: KEYCLOAK_SERVER
             value: "${KEYCLOAK_SCHEME}://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}${KEYCLOAK_PATH}"
+          - name: PORT
+            value: "${PORT}"
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           name: mbop
