@@ -2,8 +2,9 @@ package ocm
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -28,6 +29,16 @@ func (ocm *SDKMock) GetUsers(u models.UserBody, q models.UserQuery) (models.User
 	}
 
 	for _, user := range u.Usernames {
+		orgID, err := rand.Int(rand.Reader, big.NewInt(999999-100000))
+		if err != nil {
+			return users, err
+		}
+
+		displayNameNum, err := rand.Int(rand.Reader, big.NewInt(99-0))
+		if err != nil {
+			return users, err
+		}
+
 		users.AddUser(models.User{
 			Username:      user,
 			ID:            uuid.New().String(),
@@ -38,8 +49,8 @@ func (ocm *SDKMock) GetUsers(u models.UserBody, q models.UserQuery) (models.User
 			IsActive:      true,
 			IsInternal:    true,
 			Locale:        "en_US",
-			OrgID:         strconv.Itoa(rand.Intn(999999 - 100000)),
-			DisplayName:   "FedRAMP" + strconv.Itoa(rand.Intn(90-0)),
+			OrgID:         strconv.Itoa(int(orgID.Int64())),
+			DisplayName:   "FedRAMP" + strconv.Itoa(int(displayNameNum.Int64())),
 			Type:          "User",
 		})
 	}
