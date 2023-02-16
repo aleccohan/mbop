@@ -27,6 +27,7 @@ func main() {
 	r.Post("/v*", handlers.CatchAll)
 	r.Get("/api/entitlements*", handlers.CatchAll)
 	r.Get("/v1/jwt", handlers.JWTV1Handler)
+	r.Post("/v1/users", handlers.UsersV1Handler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
