@@ -129,12 +129,12 @@ func responseToUsers(response *v1.AccountsListResponse) models.Users {
 func createSearchString(u models.UserBody) string {
 	search := ""
 
-	for i := range u.Usernames {
+	for i := range u.Users {
 		if i > 0 {
 			search += " or "
 		}
 
-		search += fmt.Sprintf("username='%s'", u.Usernames[i])
+		search += fmt.Sprintf("username='%s'", u.Users[i])
 	}
 
 	return search

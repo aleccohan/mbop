@@ -24,7 +24,7 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
 		var usernames models.UserBody
-		err = json.Unmarshal([]byte(body), &usernames)
+		err = json.Unmarshal(body, &usernames)
 		if err != nil {
 			do400(w, "failed to parse request body: "+err.Error()+", request must include 'usernames': [] ")
 			return

@@ -20,15 +20,15 @@ func (ocm *SDKMock) InitSdkConnection(ctx context.Context) error {
 func (ocm *SDKMock) GetUsers(u models.UserBody, q models.UserQuery) (models.Users, error) {
 	var users models.Users
 
-	if u.Usernames == nil {
+	if u.Users == nil {
 		return users, nil
 	}
 
-	if u.Usernames[0] == "errorTest" {
+	if u.Users[0] == "errorTest" {
 		return users, fmt.Errorf("internal AMS Error")
 	}
 
-	for _, user := range u.Usernames {
+	for _, user := range u.Users {
 		orgID, err := rand.Int(rand.Reader, big.NewInt(999999-100000))
 		if err != nil {
 			return users, err
