@@ -28,7 +28,7 @@ type UserQuery struct {
 }
 
 type UserBody struct {
-	Users []string `json:"users"`
+	Usernames []string `json:"usernames"`
 }
 
 func (u *Users) AddUser(user User) {

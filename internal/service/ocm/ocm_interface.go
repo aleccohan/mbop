@@ -17,6 +17,7 @@ type OCM interface {
 
 // re-declaring ams constant here to avoid circular module importing
 const amsModule = "ams"
+const mockModule = "mock"
 
 func NewOcmClient() (OCM, error) {
 	var client OCM
@@ -24,7 +25,7 @@ func NewOcmClient() (OCM, error) {
 	switch config.Get().UsersModule {
 	case amsModule:
 		client = &SDK{}
-	case "mock":
+	case mockModule:
 		client = &SDKMock{}
 	default:
 		return nil, fmt.Errorf("unsupported users module %q", config.Get().UsersModule)
