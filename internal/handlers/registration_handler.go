@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/redhatinsights/mbop/internal/store"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
 type registationCreateRequest struct {
-	Uid *string `json:"uid,omitempty"`
+	UID *string `json:"uid,omitempty"`
 }
 
 type registrationCreateResponse struct {
@@ -33,43 +33,27 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if body.Uid == nil || *body.Uid == "" {
+	if body.UID == nil || *body.UID == "" {
 		do400(w, "required parameter [uid] not found in body")
 		return
 	}
 
-	raw := r.Header.Get("Authorization")
-	if raw == "" {
-		do400(w, "need bearer token for registration")
-		return
-	}
-
-	if !strings.HasPrefix(raw, "Bearer ") {
-		do400(w, "need bearer token for registration")
-		return
-	}
-
-	parts := strings.Fields(raw)
-	if len(parts) != 2 {
-		do400(w, "bearer token in improper format")
+	id := identity.Get(r.Context())
+	if !id.Identity.User.OrgAdmin {
+		doError(w, "user must be org admin to register satellite", 403)
 		return
 	}
 
 	db := store.GetStore()
-
-	// TODO: look up orgid from token?
-	token := parts[1]
-	orgId := _getOrgIdFromToken(token)
-
-	_, err = db.Find(orgId, *body.Uid)
+	_, err = db.Find(id.Identity.OrgID, *body.UID)
 	if err == nil {
 		doError(w, "existing registration found", 409)
 		return
 	}
 
-	id, err := db.Create(&store.Registration{
-		OrgID: orgId,
-		UID:   *body.Uid,
+	guid, err := db.Create(&store.Registration{
+		OrgID: id.Identity.OrgID,
+		UID:   *body.UID,
 	})
 	if err != nil {
 		do500(w, "failed to create registration: "+err.Error())
@@ -77,13 +61,8 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendJSONWithStatusCode(w, &registrationCreateResponse{
-		Registered: id,
-		OrgID:      orgId,
-		UID:        *body.Uid,
+		Registered: guid,
+		OrgID:      id.Identity.OrgID,
+		UID:        *body.UID,
 	}, 201)
-}
-
-// TODO: call out to AMS
-func _getOrgIdFromToken(token string) string {
-	return token
 }
