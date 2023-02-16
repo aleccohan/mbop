@@ -39,7 +39,7 @@ func (ocm *SDKMock) GetUsers(u models.UserBody, q models.UserQuery) (models.User
 			IsInternal:    true,
 			Locale:        "en_US",
 			OrgID:         strconv.Itoa(rand.Intn(999999 - 100000)),
-			DisplayName:   "FedRAMP1",
+			DisplayName:   "FedRAMP" + strconv.Itoa(rand.Intn(90-0)),
 			Type:          "User",
 		})
 	}
