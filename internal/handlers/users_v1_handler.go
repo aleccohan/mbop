@@ -15,7 +15,7 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	switch config.Get().UsersModule {
-	case amsModule:
+	case amsModule, mockModule:
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			do500(w, "failed to read request body: "+err.Error())
