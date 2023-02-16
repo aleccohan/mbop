@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/redhatinsights/mbop/internal/service/mailer"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/mbop/internal/handlers"
 	l "github.com/redhatinsights/mbop/internal/logger"
@@ -28,6 +30,13 @@ func main() {
 	r.Get("/api/entitlements*", handlers.CatchAll)
 	r.Get("/v1/jwt", handlers.JWTV1Handler)
 	r.Post("/v1/users", handlers.UsersV1Handler)
+	r.Post("/v1/sendEmails", handlers.SendEmails)
+
+	err := mailer.InitConfig()
+	if err != nil {
+		// TODO: should we panic if the mailer module fails to init?
+		l.Log.Info("failed to init mailer module", "error", err)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {

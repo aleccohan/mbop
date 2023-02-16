@@ -55,6 +55,20 @@ objects:
             value: ${COGNITO_SCOPE}
           - name: USERS_MODULE
             value: ${USERS_MODULE}
+          - name: SES_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-ses
+                key: access-key
+                optional: true
+          - name: SES_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-ses
+                key: secret-key
+                optional: true
+          - name: MAILER_MODULE
+            value: "${MAILER_MODULE}"
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           name: mbop
@@ -134,3 +148,6 @@ parameters:
 - name: USERS_MODULE
   description: optional USERS module override
   value: ""
+- name: MAILER_MODULE
+  description: which module to use to send emails
+  value: "print"
