@@ -31,6 +31,7 @@ func main() {
 	r.Get("/v1/jwt", handlers.JWTV1Handler)
 	r.Post("/v1/users", handlers.UsersV1Handler)
 	r.Post("/v1/sendEmails", handlers.SendEmails)
+	r.Get("/v3/accounts/{orgID}/users", handlers.AccountsV3UsersHandler)
 
 	err := mailer.InitConfig()
 	if err != nil {

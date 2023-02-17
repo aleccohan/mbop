@@ -22,9 +22,16 @@ type User struct {
 	Type          string `json:"type"`
 }
 
-type UserQuery struct {
+type UserV1Query struct {
 	SortOrder string `json:"sortOrder"`
 	QueryBy   string `json:"queryBy"`
+}
+
+type UserV3Query struct {
+	SortOrder string `json:"sortOrder"`
+	AdminOnly bool   `json:"admin_only"`
+	Limit     int    `json:"limit"`
+	Offset    int    `json:"offset"`
 }
 
 type UserBody struct {
@@ -33,4 +40,8 @@ type UserBody struct {
 
 func (u *Users) AddUser(user User) {
 	u.Users = append(u.Users, user)
+}
+
+func (u *Users) RemoveUser(index int) {
+	u.Users = append(u.Users[:index], u.Users[index+1:]...)
 }

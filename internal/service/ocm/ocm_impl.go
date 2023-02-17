@@ -51,7 +51,7 @@ func (ocm *SDK) InitSdkConnection(ctx context.Context) error {
 	return nil
 }
 
-func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserQuery) (models.Users, error) {
+func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserV1Query) (models.Users, error) {
 	search := createSearchString(usernames)
 	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
 
@@ -98,6 +98,26 @@ func (ocm *SDK) GetOrgAdmin(u []models.User) (models.OrgAdminResponse, error) {
 	return orgAdminResponse, err
 }
 
+func (ocm *SDK) GetAccountV3Users(orgID string, q models.UserV3Query) (models.Users, error) {
+	search := createAccountsV3UsersSearchString(orgID)
+
+	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
+
+	collection = collection.Order(createV3QueryOrder(q))
+	collection = collection.Size(q.Limit)
+	collection = collection.Page(q.Offset)
+
+	users := models.Users{}
+	AccountV3UsersResponse, err := collection.Send()
+	if err != nil {
+		return users, err
+	}
+
+	users = responseToV3Users(AccountV3UsersResponse)
+
+	return users, err
+}
+
 func (ocm *SDK) CloseSdkConnection() {
 	ocm.client.Close()
 }
@@ -120,6 +140,26 @@ func responseToUsers(response *v1.AccountsListResponse) models.Users {
 			OrgID:         items[i].Organization().ID(),
 			DisplayName:   items[i].Organization().Name(),
 			Type:          items[i].Kind(),
+		})
+	}
+
+	return users
+}
+
+func responseToV3Users(response *v1.AccountsListResponse) models.Users {
+	users := models.Users{}
+	items := response.Items().Slice()
+
+	for i := range items {
+		users.AddUser(models.User{
+			ID:         items[i].Organization().ID(),
+			Username:   items[i].Username(),
+			Email:      items[i].Email(),
+			FirstName:  items[i].FirstName(),
+			LastName:   items[i].LastName(),
+			IsActive:   true,
+			IsInternal: true,
+			Locale:     "en_US",
 		})
 	}
 
@@ -154,12 +194,26 @@ func createOrgAdminSearchString(users []models.User) string {
 	return search
 }
 
-func createQueryOrder(q models.UserQuery) string {
+func createAccountsV3UsersSearchString(orgID string) string {
+	return fmt.Sprintf("organization.id='%s'", orgID)
+}
+
+func createQueryOrder(q models.UserV1Query) string {
 	order := ""
 
 	if q.QueryBy != "" {
 		order += q.QueryBy
 	}
+
+	if q.SortOrder != "" {
+		order += fmt.Sprint(" " + q.SortOrder)
+	}
+
+	return order
+}
+
+func createV3QueryOrder(q models.UserV3Query) string {
+	order := "organization.id"
 
 	if q.SortOrder != "" {
 		order += fmt.Sprint(" " + q.SortOrder)

@@ -17,7 +17,7 @@ func (ocm *SDKMock) InitSdkConnection(ctx context.Context) error {
 	return nil
 }
 
-func (ocm *SDKMock) GetUsers(u models.UserBody, q models.UserQuery) (models.Users, error) {
+func (ocm *SDKMock) GetUsers(u models.UserBody, q models.UserV1Query) (models.Users, error) {
 	var users models.Users
 
 	if u.Users == nil {
@@ -75,6 +75,14 @@ func (ocm *SDKMock) GetOrgAdmin(users []models.User) (models.OrgAdminResponse, e
 			IsOrgAdmin: true,
 		}
 	}
+
+	return response, nil
+}
+
+func (ocm *SDKMock) GetAccountV3Users(orgID string, q models.UserV3Query) (models.Users, error) {
+	response := models.Users{}
+
+	// Add shit here
 
 	return response, nil
 }

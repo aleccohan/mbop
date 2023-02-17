@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	l "github.com/redhatinsights/mbop/internal/logger"
@@ -13,6 +14,7 @@ import (
 var (
 	validSortOrder = []string{"asc", "des"}
 	validQueryBy   = []string{"userId", "orgId"} // Originally orgId was "principal" but in FedRAMP cluster we only have orgId
+	validAdminOnly = []string{"true", "false"}
 )
 
 func sendJSON(w http.ResponseWriter, data any) {
@@ -54,31 +56,121 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func initUserQuery(r *http.Request) (models.UserQuery, error) {
-	q := models.UserQuery{}
+func initV1UserQuery(r *http.Request) (models.UserV1Query, error) {
+	q := models.UserV1Query{}
 
-	if r.URL.Query().Get("sortOrder") == "" || stringInSlice(r.URL.Query().Get("sortOrder"), validSortOrder) {
-		if r.URL.Query().Get("sortOrder") == validSortOrder[1] {
-			q.SortOrder = "desc"
-		} else {
-			q.SortOrder = r.URL.Query().Get("sortOrder")
-		}
-	} else {
-		return q, fmt.Errorf("sortOrder must be one of '', " + strings.Join(validSortOrder, ", "))
+	sortOrder, err := getSortOrder(r)
+	if err != nil {
+		return q, err
 	}
 
+	queryBy, err := getQueryBy(r)
+	if err != nil {
+		return q, err
+	}
+
+	q.SortOrder = sortOrder
+	q.QueryBy = queryBy
+
+	return q, nil
+}
+
+func initAccountV3UserQuery(r *http.Request) (models.UserV3Query, error) {
+	q := models.UserV3Query{}
+
+	sortOrder, err := getSortOrder(r)
+	if err != nil {
+		return q, err
+	}
+
+	adminOnly, err := getAdminOnly(r)
+	if err != nil {
+		return q, err
+	}
+
+	limit, err := getLimit(r)
+	if err != nil {
+		return q, err
+	}
+
+	offset, err := getOffset(r)
+	if err != nil {
+		return q, err
+	}
+
+	q.SortOrder = sortOrder
+	q.AdminOnly = adminOnly
+	q.Limit = limit
+	q.Offset = offset
+
+	return q, nil
+}
+
+func getSortOrder(r *http.Request) (string, error) {
+	if r.URL.Query().Get("sortOrder") == "" || stringInSlice(r.URL.Query().Get("sortOrder"), validSortOrder) {
+		if r.URL.Query().Get("sortOrder") == validSortOrder[1] {
+			return "desc", nil
+		} else {
+			return r.URL.Query().Get("sortOrder"), nil
+		}
+	} else {
+		return "", fmt.Errorf("sortOrder must be one of '', " + strings.Join(validSortOrder, ", "))
+	}
+}
+
+func getQueryBy(r *http.Request) (string, error) {
 	if r.URL.Query().Get("queryBy") == "" || stringInSlice(r.URL.Query().Get("queryBy"), validQueryBy) {
 		// Translate bop parameters into AMS parameters
 		if r.URL.Query().Get("queryBy") == validQueryBy[0] {
-			q.QueryBy = "id"
+			return "id", nil
 		}
 
 		if r.URL.Query().Get("queryBy") == validQueryBy[1] {
-			q.QueryBy = "organizationId"
+			return "organizationId", nil
 		}
 	} else {
-		return q, fmt.Errorf("queryBy must be one of " + strings.Join(validQueryBy, ", "))
+		return "", fmt.Errorf("queryBy must be one of " + strings.Join(validQueryBy, ", "))
 	}
 
-	return q, nil
+	return "", nil
+}
+
+func getAdminOnly(r *http.Request) (bool, error) {
+	if r.URL.Query().Get("admin_only") == "" || stringInSlice(r.URL.Query().Get("admin_only"), validAdminOnly) {
+		if r.URL.Query().Get("admin_only") == validAdminOnly[0] {
+			return true, nil
+		} else {
+			return false, nil
+		}
+	} else {
+		return false, fmt.Errorf("admin_only must be one of " + strings.Join(validSortOrder, ", "))
+	}
+
+	return false, nil
+}
+
+func getLimit(r *http.Request) (int, error) {
+	if r.URL.Query().Get("limit") == "" {
+		return defaultLimit, nil
+	}
+
+	limit, err := strconv.Atoi(r.URL.Query().Get("admin_only"))
+	if err != nil {
+		return defaultLimit, fmt.Errorf("limit must be of type int")
+	}
+
+	return limit, nil
+}
+
+func getOffset(r *http.Request) (int, error) {
+	if r.URL.Query().Get("offset") == "" {
+		return defaultOffset, nil
+	}
+
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	if err != nil {
+		return defaultLimit, fmt.Errorf("offset must be of type int")
+	}
+
+	return offset, nil
 }
