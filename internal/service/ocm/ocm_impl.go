@@ -57,7 +57,7 @@ func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserQuery) (models.
 
 	collection = collection.Order(createQueryOrder(q))
 
-	users := models.Users{}
+	users := models.Users{Users: []models.User{}}
 	usersResponse, err := collection.Send()
 	if err != nil {
 		return users, err
