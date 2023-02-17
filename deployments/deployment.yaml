@@ -90,6 +90,8 @@ objects:
       app: mbop
     name: mbop
   spec:
+    selector:
+      app: mbop
     ports:
     - name: svc
       port: ${{PORT}}
