@@ -7,6 +7,7 @@ import (
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/openshift-online/ocm-sdk-go/logging"
+	"github.com/redhatinsights/mbop/internal/config"
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
@@ -28,23 +29,19 @@ func (ocm *SDK) InitSdkConnection(ctx context.Context) error {
 		Logger(logger).
 
 		// SA Auth:
-		// Client(os.Getenv("COGNITO_APP_CLIENT_ID"), os.Getenv("COGNITO_APP_CLIENT_SECRET")).
-		Client("6k2fo38r9l306k9l2t1ji428jo", "1f8ontqbalms06td5375trbc1g2rmgmficeo146u2s6odinr9b2q").
+		Client(config.Get().CognitoAppClientID, config.Get().CognitoAppClientSecret).
 
 		// Offline Token Auth:
 		// Tokens(<token>).
 
 		// Oauth Token URL:
-		// TokenURL(os.Getenv("OAUTH_TOKEN_URL")).
-		TokenURL("https://ocm-ra-stage-domain.auth-fips.us-gov-west-1.amazoncognito.com/oauth2/token").
+		TokenURL(config.Get().OauthTokenURL).
 
 		// Route to hit for AMS:
-		// URL(os.Getenv("AMS_URL")).
-		URL("https://ocm-stage.rosa-nlb.appsrefrs01ugw1.p1.openshiftusgov.com").
+		URL(config.Get().AmsURL).
 
 		// SA Scopes:
-		// Scopes(os.Getenv("COGNITO_SCOPE")).
-		Scopes("ocm/InsightsServiceAccount").
+		Scopes(config.Get().CognitoScope).
 		BuildContext(ctx)
 
 	if err != nil {
