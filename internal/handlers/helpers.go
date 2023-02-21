@@ -132,9 +132,9 @@ func getSortOrder(r *http.Request) (string, error) {
 		} else {
 			return r.URL.Query().Get("sortOrder"), nil
 		}
-	} else {
-		return "", fmt.Errorf("sortOrder must be one of '', " + strings.Join(validSortOrder, ", "))
 	}
+
+	return "", fmt.Errorf("sortOrder must be one of '', " + strings.Join(validSortOrder, ", "))
 }
 
 func getQueryBy(r *http.Request) (string, error) {
@@ -158,9 +158,9 @@ func getAdminOnly(r *http.Request) (bool, error) {
 	if r.URL.Query().Get("admin_only") == "" || stringInSlice(r.URL.Query().Get("admin_only"), validAdminOnly) {
 		if r.URL.Query().Get("admin_only") == validAdminOnly[0] {
 			return true, nil
-		} else {
-			return false, nil
 		}
+
+		return false, nil
 	} else {
 		return false, fmt.Errorf("admin_only must be one of " + strings.Join(validSortOrder, ", "))
 	}

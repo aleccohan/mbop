@@ -146,23 +146,6 @@ func responseToUsers(response *v1.AccountsListResponse) models.Users {
 	return users
 }
 
-func usersToV3Response(u models.Users) models.UserV3Response {
-	response := models.UserV3Response{}
-
-	for _, user := range u.Users {
-		response.ID = user.OrgID
-		response.Email = user.Email
-		response.Username = user.Username
-		response.FirstName = user.FirstName
-		response.LastName = user.LastName
-		response.IsActive = user.IsActive
-		response.IsInternal = user.IsInternal
-		response.Locale = user.Locale
-	}
-
-	return response
-}
-
 func createSearchString(u models.UserBody) string {
 	search := ""
 
