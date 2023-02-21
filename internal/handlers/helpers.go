@@ -111,12 +111,13 @@ func usersToV3Response(users []models.User) models.UserV3Responses {
 
 	for _, user := range users {
 		r.AddV3Response(models.UserV3Response{
-			ID:         user.OrgID,
+			ID:         user.ID,
 			Email:      user.Email,
 			Username:   user.Username,
 			FirstName:  user.FirstName,
 			LastName:   user.LastName,
 			IsActive:   user.IsActive,
+			IsOrgAdmin: user.IsOrgAdmin,
 			IsInternal: user.IsInternal,
 			Locale:     user.Locale,
 		})

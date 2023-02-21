@@ -33,6 +33,7 @@ type UserV3Response struct {
 	FirstName  string `json:"first_name"`
 	LastName   string `json:"last_name"`
 	IsActive   bool   `json:"is_active"`
+	IsOrgAdmin bool   `json:"is_org_admin"`
 	IsInternal bool   `json:"is_internal"`
 	Locale     string `json:"locale"`
 }
