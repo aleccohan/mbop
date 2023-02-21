@@ -106,6 +106,25 @@ func initAccountV3UserQuery(r *http.Request) (models.UserV3Query, error) {
 	return q, nil
 }
 
+func usersToV3Response(users []models.User) models.UserV3Responses {
+	r := models.UserV3Responses{}
+
+	for _, user := range users {
+		r.AddV3Response(models.UserV3Response{
+			ID:         user.OrgID,
+			Email:      user.Email,
+			Username:   user.Username,
+			FirstName:  user.FirstName,
+			LastName:   user.LastName,
+			IsActive:   user.IsActive,
+			IsInternal: user.IsInternal,
+			Locale:     user.Locale,
+		})
+	}
+
+	return r
+}
+
 func getSortOrder(r *http.Request) (string, error) {
 	if r.URL.Query().Get("sortOrder") == "" || stringInSlice(r.URL.Query().Get("sortOrder"), validSortOrder) {
 		if r.URL.Query().Get("sortOrder") == validSortOrder[1] {
@@ -145,8 +164,6 @@ func getAdminOnly(r *http.Request) (bool, error) {
 	} else {
 		return false, fmt.Errorf("admin_only must be one of " + strings.Join(validSortOrder, ", "))
 	}
-
-	return false, nil
 }
 
 func getLimit(r *http.Request) (int, error) {
@@ -154,7 +171,7 @@ func getLimit(r *http.Request) (int, error) {
 		return defaultLimit, nil
 	}
 
-	limit, err := strconv.Atoi(r.URL.Query().Get("admin_only"))
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil {
 		return defaultLimit, fmt.Errorf("limit must be of type int")
 	}

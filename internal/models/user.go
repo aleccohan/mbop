@@ -4,6 +4,10 @@ type Users struct {
 	Users []User `json:"users,omitempty"`
 }
 
+type UserV3Responses struct {
+	Responses []UserV3Response `json:"responses,omitempty"`
+}
+
 type User struct {
 	Username      string `json:"username"`
 	ID            string `json:"id"`
@@ -20,6 +24,17 @@ type User struct {
 	DisplayName   string `json:"display_name"`
 	Entitlements  string `json:"entitlements"`
 	Type          string `json:"type"`
+}
+
+type UserV3Response struct {
+	ID         string `json:"id"`
+	Username   string `json:"username"`
+	Email      string `json:"email"`
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+	IsActive   bool   `json:"is_active"`
+	IsInternal bool   `json:"is_internal"`
+	Locale     string `json:"locale"`
 }
 
 type UserV1Query struct {
@@ -44,4 +59,8 @@ func (u *Users) AddUser(user User) {
 
 func (u *Users) RemoveUser(index int) {
 	u.Users = append(u.Users[:index], u.Users[index+1:]...)
+}
+
+func (r *UserV3Responses) AddV3Response(response UserV3Response) {
+	r.Responses = append(r.Responses, response)
 }

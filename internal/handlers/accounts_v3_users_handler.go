@@ -12,7 +12,7 @@ func AccountsV3UsersHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	switch config.Get().UsersModule {
-	case amsModule:
+	case amsModule, mockModule:
 		orgID := chi.URLParam(r, "orgID")
 		if orgID == "" {
 			do400(w, "Request URL must include orgID: /v3/accounts/{orgID}/users")
@@ -63,7 +63,9 @@ func AccountsV3UsersHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		sendJSON(w, u.Users)
+		r := usersToV3Response(u.Users)
+
+		sendJSON(w, r.Responses)
 	default:
 		// mbop server instance injected somewhere
 		// pass right through to the current handler

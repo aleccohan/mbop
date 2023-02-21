@@ -7,7 +7,6 @@ import (
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/openshift-online/ocm-sdk-go/logging"
-	"github.com/redhatinsights/mbop/internal/config"
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
@@ -29,19 +28,23 @@ func (ocm *SDK) InitSdkConnection(ctx context.Context) error {
 		Logger(logger).
 
 		// SA Auth:
-		Client(config.Get().CognitoAppClientID, config.Get().CognitoAppClientSecret).
+		// Client(os.Getenv("COGNITO_APP_CLIENT_ID"), os.Getenv("COGNITO_APP_CLIENT_SECRET")).
+		Client("6k2fo38r9l306k9l2t1ji428jo", "1f8ontqbalms06td5375trbc1g2rmgmficeo146u2s6odinr9b2q").
 
 		// Offline Token Auth:
 		// Tokens(<token>).
 
 		// Oauth Token URL:
-		TokenURL(config.Get().OauthTokenURL).
+		// TokenURL(os.Getenv("OAUTH_TOKEN_URL")).
+		TokenURL("https://ocm-ra-stage-domain.auth-fips.us-gov-west-1.amazoncognito.com/oauth2/token").
 
 		// Route to hit for AMS:
-		URL(config.Get().AmsURL).
+		// URL(os.Getenv("AMS_URL")).
+		URL("https://ocm-stage.rosa-nlb.appsrefrs01ugw1.p1.openshiftusgov.com").
 
 		// SA Scopes:
-		Scopes(config.Get().CognitoScope).
+		// Scopes(os.Getenv("COGNITO_SCOPE")).
+		Scopes("ocm/InsightsServiceAccount").
 		BuildContext(ctx)
 
 	if err != nil {
@@ -107,13 +110,13 @@ func (ocm *SDK) GetAccountV3Users(orgID string, q models.UserV3Query) (models.Us
 	collection = collection.Size(q.Limit)
 	collection = collection.Page(q.Offset)
 
-	users := models.Users{}
+	users := models.Users{Users: []models.User{}}
 	AccountV3UsersResponse, err := collection.Send()
 	if err != nil {
 		return users, err
 	}
 
-	users = responseToV3Users(AccountV3UsersResponse)
+	users = responseToUsers(AccountV3UsersResponse)
 
 	return users, err
 }
@@ -146,24 +149,21 @@ func responseToUsers(response *v1.AccountsListResponse) models.Users {
 	return users
 }
 
-func responseToV3Users(response *v1.AccountsListResponse) models.Users {
-	users := models.Users{}
-	items := response.Items().Slice()
+func usersToV3Response(u models.Users) models.UserV3Response {
+	response := models.UserV3Response{}
 
-	for i := range items {
-		users.AddUser(models.User{
-			ID:         items[i].Organization().ID(),
-			Username:   items[i].Username(),
-			Email:      items[i].Email(),
-			FirstName:  items[i].FirstName(),
-			LastName:   items[i].LastName(),
-			IsActive:   true,
-			IsInternal: true,
-			Locale:     "en_US",
-		})
+	for _, user := range u.Users {
+		response.ID = user.OrgID
+		response.Email = user.Email
+		response.Username = user.Username
+		response.FirstName = user.FirstName
+		response.LastName = user.LastName
+		response.IsActive = user.IsActive
+		response.IsInternal = user.IsInternal
+		response.Locale = user.Locale
 	}
 
-	return users
+	return response
 }
 
 func createSearchString(u models.UserBody) string {
