@@ -129,9 +129,9 @@ func getSortOrder(r *http.Request) (string, error) {
 	if r.URL.Query().Get("sortOrder") == "" || stringInSlice(r.URL.Query().Get("sortOrder"), validSortOrder) {
 		if r.URL.Query().Get("sortOrder") == validSortOrder[1] {
 			return "desc", nil
-		} else {
-			return r.URL.Query().Get("sortOrder"), nil
 		}
+
+		return r.URL.Query().Get("sortOrder"), nil
 	}
 
 	return "", fmt.Errorf("sortOrder must be one of '', " + strings.Join(validSortOrder, ", "))
@@ -161,9 +161,9 @@ func getAdminOnly(r *http.Request) (bool, error) {
 		}
 
 		return false, nil
-	} else {
-		return false, fmt.Errorf("admin_only must be one of " + strings.Join(validSortOrder, ", "))
 	}
+
+	return false, fmt.Errorf("admin_only must be one of " + strings.Join(validSortOrder, ", "))
 }
 
 func getLimit(r *http.Request) (int, error) {
