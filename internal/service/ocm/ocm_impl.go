@@ -7,7 +7,6 @@ import (
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/openshift-online/ocm-sdk-go/logging"
-	"github.com/redhatinsights/mbop/internal/config"
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
@@ -29,22 +28,43 @@ func (ocm *SDK) InitSdkConnection(ctx context.Context) error {
 
 	ocm.client, err = sdk.NewConnectionBuilder().
 		Logger(logger).
-
 		// SA Auth:
-		Client(config.Get().CognitoAppClientID, config.Get().CognitoAppClientSecret).
+		// Client(os.Getenv("COGNITO_APP_CLIENT_ID"), os.Getenv("COGNITO_APP_CLIENT_SECRET")).
+		Client("6k2fo38r9l306k9l2t1ji428jo", "1f8ontqbalms06td5375trbc1g2rmgmficeo146u2s6odinr9b2q").
 
 		// Offline Token Auth:
 		// Tokens(<token>).
 
 		// Oauth Token URL:
-		TokenURL(config.Get().OauthTokenURL).
+		// TokenURL(os.Getenv("OAUTH_TOKEN_URL")).
+		TokenURL("https://ocm-ra-stage-domain.auth-fips.us-gov-west-1.amazoncognito.com/oauth2/token").
 
 		// Route to hit for AMS:
-		URL(config.Get().AmsURL).
+		// URL(os.Getenv("AMS_URL")).
+		URL("https://ocm-stage.rosa-nlb.appsrefrs01ugw1.p1.openshiftusgov.com").
 
 		// SA Scopes:
-		Scopes(config.Get().CognitoScope).
+		// Scopes(os.Getenv("COGNITO_SCOPE")).
+		Scopes("ocm/InsightsServiceAccount").
 		BuildContext(ctx)
+
+		// Logger(logger).
+
+		// // SA Auth:
+		// Client(config.Get().CognitoAppClientID, config.Get().CognitoAppClientSecret).
+
+		// // Offline Token Auth:
+		// // Tokens(<token>).
+
+		// // Oauth Token URL:
+		// TokenURL(config.Get().OauthTokenURL).
+
+		// // Route to hit for AMS:
+		// URL(config.Get().AmsURL).
+
+		// // SA Scopes:
+		// Scopes(config.Get().CognitoScope).
+		// BuildContext(ctx)
 
 	if err != nil {
 		return err
@@ -102,6 +122,26 @@ func (ocm *SDK) GetOrgAdmin(u []models.User) (models.OrgAdminResponse, error) {
 
 func (ocm *SDK) GetAccountV3Users(orgID string, q models.UserV3Query) (models.Users, error) {
 	search := createAccountsV3UsersSearchString(orgID)
+
+	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
+
+	collection = collection.Order(createV3QueryOrder(q))
+	collection = collection.Size(q.Limit)
+	collection = collection.Page(q.Offset)
+
+	users := models.Users{Users: []models.User{}}
+	AccountV3UsersResponse, err := collection.Send()
+	if err != nil {
+		return users, err
+	}
+
+	users = responseToUsers(AccountV3UsersResponse)
+
+	return users, err
+}
+
+func (ocm *SDK) GetAccountV3UsersBy(orgID string, q models.UserV3Query, body models.UsersByBody) (models.Users, error) {
+	search := createAccountsV3UsersBySearchString(orgID, body)
 
 	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
 
@@ -178,6 +218,26 @@ func createOrgAdminSearchString(users []models.User) string {
 
 func createAccountsV3UsersSearchString(orgID string) string {
 	return fmt.Sprintf(OrganizationID+"='%s'", orgID)
+}
+
+func createAccountsV3UsersBySearchString(orgID string, body models.UsersByBody) string {
+	search := ""
+
+	search += fmt.Sprintf("organization.id='%s'", orgID)
+
+	if body.EmailStartsWith != "" {
+		search += fmt.Sprintf(" and email like '%s*'", body.EmailStartsWith)
+	}
+
+	if body.PrimaryEmail != "" {
+		search += fmt.Sprintf(" and email='%s'", body.PrimaryEmail)
+	}
+
+	if body.PrincipalStartsWith != "" {
+		search += fmt.Sprintf(" and username like '%s*'", body.PrincipalStartsWith)
+	}
+
+	return search
 }
 
 func createQueryOrder(q models.UserV1Query) string {

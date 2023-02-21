@@ -115,6 +115,14 @@ func (ocm *SDKMock) GetAccountV3Users(orgID string, q models.UserV3Query) (model
 	return users, nil
 }
 
+func (ocm *SDKMock) GetAccountV3UsersBy(orgID string, q models.UserV3Query, body models.UsersByBody) (models.Users, error) {
+	users := models.Users{}
+
+	// Add stuff here later
+
+	return users, nil
+}
+
 func (ocm *SDKMock) CloseSdkConnection() {
 	// nil
 }

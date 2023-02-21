@@ -13,6 +13,7 @@ type OCM interface {
 	CloseSdkConnection()
 	GetUsers(users models.UserBody, q models.UserV1Query) (models.Users, error)
 	GetAccountV3Users(orgID string, q models.UserV3Query) (models.Users, error)
+	GetAccountV3UsersBy(orgID string, q models.UserV3Query, body models.UsersByBody) (models.Users, error)
 	GetOrgAdmin([]models.User) (models.OrgAdminResponse, error)
 }
 
