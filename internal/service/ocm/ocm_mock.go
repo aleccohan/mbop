@@ -80,7 +80,7 @@ func (ocm *SDKMock) GetOrgAdmin(users []models.User) (models.OrgAdminResponse, e
 }
 
 func (ocm *SDKMock) GetAccountV3Users(orgID string, q models.UserV3Query) (models.Users, error) {
-	users := models.Users{}
+	users := models.Users{Users: []models.User{}}
 
 	if orgID == "empty" {
 		return users, nil
@@ -116,7 +116,7 @@ func (ocm *SDKMock) GetAccountV3Users(orgID string, q models.UserV3Query) (model
 }
 
 func (ocm *SDKMock) GetAccountV3UsersBy(orgID string, q models.UserV3Query, body models.UsersByBody) (models.Users, error) {
-	users := models.Users{}
+	users := models.Users{Users: []models.User{}}
 
 	if orgID == "empty" {
 		return users, nil
