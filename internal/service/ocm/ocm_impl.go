@@ -11,6 +11,8 @@ import (
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
+const OrganizationID = "organization.id"
+
 type SDK struct {
 	client *sdk.Connection
 }
@@ -193,7 +195,7 @@ func createQueryOrder(q models.UserV1Query) string {
 }
 
 func createV3QueryOrder(q models.UserV3Query) string {
-	order := "organization.id"
+	order := OrganizationID
 
 	if q.SortOrder != "" {
 		order += fmt.Sprint(" " + q.SortOrder)
