@@ -177,7 +177,7 @@ func createOrgAdminSearchString(users []models.User) string {
 }
 
 func createAccountsV3UsersSearchString(orgID string) string {
-	return fmt.Sprintf("organization.id='%s'", orgID)
+	return fmt.Sprintf(OrganizationID+"='%s'", orgID)
 }
 
 func createQueryOrder(q models.UserV1Query) string {
@@ -194,9 +194,9 @@ func createQueryOrder(q models.UserV1Query) string {
 	return order
 }
 
-func createV3QueryOrder(q models.UserV3Query) string {
-	order := OrganizationID
+var order = OrganizationID
 
+func createV3QueryOrder(q models.UserV3Query) string {
 	if q.SortOrder != "" {
 		order += fmt.Sprint(" " + q.SortOrder)
 	}
