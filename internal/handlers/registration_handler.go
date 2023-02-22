@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/redhatinsights/mbop/internal/store"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
@@ -11,12 +12,6 @@ import (
 
 type registationCreateRequest struct {
 	UID *string `json:"uid,omitempty"`
-}
-
-type registrationCreateResponse struct {
-	Registered string `json:"registered,omitempty"`
-	OrgID      string `json:"org_id,omitempty"`
-	UID        string `json:"uid,omitempty"`
 }
 
 func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +39,18 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	gatewayCN := r.Header.Get("x-rh-certauth-cn")
+	parts := strings.Split(gatewayCN, "=")
+	if gatewayCN == "" || len(parts) < 2 {
+		doError(w, "[x-rh-certauth-cn] header not present", 400)
+		return
+	}
+
+	if parts[1] != *body.UID {
+		doError(w, "x-rh-certauth-cn does not match uid", 400)
+		return
+	}
+
 	db := store.GetStore()
 	_, err = db.Find(id.Identity.OrgID, *body.UID)
 	if err == nil {
@@ -51,7 +58,7 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	guid, err := db.Create(&store.Registration{
+	_, err = db.Create(&store.Registration{
 		OrgID: id.Identity.OrgID,
 		UID:   *body.UID,
 	})
@@ -60,9 +67,5 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sendJSONWithStatusCode(w, &registrationCreateResponse{
-		Registered: guid,
-		OrgID:      id.Identity.OrgID,
-		UID:        *body.UID,
-	}, 201)
+	sendJSONWithStatusCode(w, newResponse("Successfully registered"), 201)
 }
