@@ -32,7 +32,12 @@ func AccountsV3UsersByHandler(w http.ResponseWriter, r *http.Request) {
 		var usersByBody models.UsersByBody
 		err = json.Unmarshal(body, &usersByBody)
 		if err != nil {
-			do400(w, "failed to parse request body: "+err.Error()+", request must include 'primaryEmail', 'emailStartsWith', or 'principalStartsWith'")
+			do400(w, "failed to parse request body: "+err.Error())
+			return
+		}
+
+		if usersByBody == (models.UsersByBody{}) {
+			do400(w, "request must include 'primaryEmail', 'emailStartsWith', or 'principalStartsWith'")
 			return
 		}
 

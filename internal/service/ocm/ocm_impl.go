@@ -226,7 +226,7 @@ func createAccountsV3UsersBySearchString(orgID string, body models.UsersByBody) 
 	search += fmt.Sprintf("organization.id='%s'", orgID)
 
 	if body.EmailStartsWith != "" {
-		search += fmt.Sprintf(" and email like '%s*'", body.EmailStartsWith)
+		search += fmt.Sprint(" and email like '" + body.EmailStartsWith + "%'")
 	}
 
 	if body.PrimaryEmail != "" {
@@ -234,7 +234,7 @@ func createAccountsV3UsersBySearchString(orgID string, body models.UsersByBody) 
 	}
 
 	if body.PrincipalStartsWith != "" {
-		search += fmt.Sprintf(" and username like '%s*'", body.PrincipalStartsWith)
+		search += fmt.Sprint(" and username like '" + body.PrincipalStartsWith + "%'")
 	}
 
 	return search
