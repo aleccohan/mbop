@@ -201,9 +201,7 @@ func createAccountsV3UsersSearchString(orgID string) string {
 }
 
 func createAccountsV3UsersBySearchString(orgID string, body models.UsersByBody) string {
-	search := ""
-
-	search += fmt.Sprintf("organization.id='%s'", orgID)
+	search := createAccountsV3UsersSearchString(orgID)
 
 	if body.EmailStartsWith != "" {
 		search += fmt.Sprint(" and email like '" + body.EmailStartsWith + "%'")
