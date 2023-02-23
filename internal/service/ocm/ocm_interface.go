@@ -11,7 +11,8 @@ import (
 type OCM interface {
 	InitSdkConnection(ctx context.Context) error
 	CloseSdkConnection()
-	GetUsers(users models.UserBody, q models.UserQuery) (models.Users, error)
+	GetUsers(users models.UserBody, q models.UserV1Query) (models.Users, error)
+	GetAccountV3Users(orgID string, q models.UserV3Query) (models.Users, error)
 	GetOrgAdmin([]models.User) (models.OrgAdminResponse, error)
 }
 

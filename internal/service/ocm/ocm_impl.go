@@ -11,6 +11,8 @@ import (
 	"github.com/redhatinsights/mbop/internal/models"
 )
 
+const OrganizationID = "organization.id"
+
 type SDK struct {
 	client *sdk.Connection
 }
@@ -51,7 +53,7 @@ func (ocm *SDK) InitSdkConnection(ctx context.Context) error {
 	return nil
 }
 
-func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserQuery) (models.Users, error) {
+func (ocm *SDK) GetUsers(usernames models.UserBody, q models.UserV1Query) (models.Users, error) {
 	search := createSearchString(usernames)
 	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
 
@@ -96,6 +98,26 @@ func (ocm *SDK) GetOrgAdmin(u []models.User) (models.OrgAdminResponse, error) {
 	}
 
 	return orgAdminResponse, err
+}
+
+func (ocm *SDK) GetAccountV3Users(orgID string, q models.UserV3Query) (models.Users, error) {
+	search := createAccountsV3UsersSearchString(orgID)
+
+	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
+
+	collection = collection.Order(createV3QueryOrder(q))
+	collection = collection.Size(q.Limit)
+	collection = collection.Page(q.Offset)
+
+	users := models.Users{Users: []models.User{}}
+	AccountV3UsersResponse, err := collection.Send()
+	if err != nil {
+		return users, err
+	}
+
+	users = responseToUsers(AccountV3UsersResponse)
+
+	return users, err
 }
 
 func (ocm *SDK) CloseSdkConnection() {
@@ -154,13 +176,27 @@ func createOrgAdminSearchString(users []models.User) string {
 	return search
 }
 
-func createQueryOrder(q models.UserQuery) string {
+func createAccountsV3UsersSearchString(orgID string) string {
+	return fmt.Sprintf(OrganizationID+"='%s'", orgID)
+}
+
+func createQueryOrder(q models.UserV1Query) string {
 	order := ""
 
 	if q.QueryBy != "" {
 		order += q.QueryBy
 	}
 
+	if q.SortOrder != "" {
+		order += fmt.Sprint(" " + q.SortOrder)
+	}
+
+	return order
+}
+
+var order = OrganizationID
+
+func createV3QueryOrder(q models.UserV3Query) string {
 	if q.SortOrder != "" {
 		order += fmt.Sprint(" " + q.SortOrder)
 	}

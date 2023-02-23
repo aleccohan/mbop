@@ -1,36 +1,25 @@
 package handlers
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/mbop/internal/config"
 	"github.com/redhatinsights/mbop/internal/service/ocm"
-
-	"github.com/redhatinsights/mbop/internal/models"
 )
 
-func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
+func AccountsV3UsersHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	switch config.Get().UsersModule {
 	case amsModule, mockModule:
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			do500(w, "failed to read request body: "+err.Error())
-			return
-		}
-		defer r.Body.Close()
-
-		var usernames models.UserBody
-		err = json.Unmarshal(body, &usernames)
-		if err != nil {
-			do400(w, "failed to parse request body: "+err.Error()+", request must include 'users': [] ")
+		orgID := chi.URLParam(r, "orgID")
+		if orgID == "" {
+			do400(w, "Request URL must include orgID: /v3/accounts/{orgID}/users")
 			return
 		}
 
-		q, err := initV1UserQuery(r)
+		q, err := initAccountV3UserQuery(r)
 		if err != nil {
 			do400(w, err.Error())
 			return
@@ -49,9 +38,9 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		u, err := client.GetUsers(usernames, q)
+		u, err := client.GetAccountV3Users(orgID, q)
 		if err != nil {
-			do500(w, "Cant Retrieve Accounts: "+err.Error())
+			do500(w, "Cant Retrieve Users: "+err.Error())
 			return
 		}
 
@@ -68,13 +57,15 @@ func UsersV1Handler(w http.ResponseWriter, r *http.Request) {
 				u.Users[i].IsOrgAdmin = response.IsOrgAdmin
 			} else {
 				user.IsOrgAdmin = false
+				if q.AdminOnly { // if admin_only return only the org_admins
+					u.RemoveUser(i)
+				}
 			}
 		}
 
-		// Close SDK Connection
-		client.CloseSdkConnection()
+		r := usersToV3Response(u.Users)
 
-		sendJSON(w, u.Users)
+		sendJSON(w, r.Responses)
 	default:
 		// mbop server instance injected somewhere
 		// pass right through to the current handler
