@@ -107,7 +107,7 @@ func initAccountV3UserQuery(r *http.Request) (models.UserV3Query, error) {
 }
 
 func usersToV3Response(users []models.User) models.UserV3Responses {
-	r := models.UserV3Responses{}
+	r := models.UserV3Responses{Responses: []models.UserV3Response{}}
 
 	for _, user := range users {
 		r.AddV3Response(models.UserV3Response{

@@ -54,6 +54,12 @@ type UserBody struct {
 	Users []string `json:"users"`
 }
 
+type UsersByBody struct {
+	PrimaryEmail        string `json:"primaryEmail"`
+	EmailStartsWith     string `json:"emailStartsWith"`
+	PrincipalStartsWith string `json:"principalStartsWith"`
+}
+
 func (u *Users) AddUser(user User) {
 	u.Users = append(u.Users, user)
 }

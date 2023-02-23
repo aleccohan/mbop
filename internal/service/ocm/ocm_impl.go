@@ -120,6 +120,26 @@ func (ocm *SDK) GetAccountV3Users(orgID string, q models.UserV3Query) (models.Us
 	return users, err
 }
 
+func (ocm *SDK) GetAccountV3UsersBy(orgID string, q models.UserV3Query, body models.UsersByBody) (models.Users, error) {
+	search := createAccountsV3UsersBySearchString(orgID, body)
+
+	collection := ocm.client.AccountsMgmt().V1().Accounts().List().Search(search)
+
+	collection = collection.Order(createV3QueryOrder(q))
+	collection = collection.Size(q.Limit)
+	collection = collection.Page(q.Offset)
+
+	users := models.Users{Users: []models.User{}}
+	AccountV3UsersResponse, err := collection.Send()
+	if err != nil {
+		return users, err
+	}
+
+	users = responseToUsers(AccountV3UsersResponse)
+
+	return users, err
+}
+
 func (ocm *SDK) CloseSdkConnection() {
 	ocm.client.Close()
 }
@@ -178,6 +198,24 @@ func createOrgAdminSearchString(users []models.User) string {
 
 func createAccountsV3UsersSearchString(orgID string) string {
 	return fmt.Sprintf(OrganizationID+"='%s'", orgID)
+}
+
+func createAccountsV3UsersBySearchString(orgID string, body models.UsersByBody) string {
+	search := createAccountsV3UsersSearchString(orgID)
+
+	if body.EmailStartsWith != "" {
+		search += fmt.Sprint(" and email like '" + body.EmailStartsWith + "%'")
+	}
+
+	if body.PrimaryEmail != "" {
+		search += fmt.Sprintf(" and email='%s'", body.PrimaryEmail)
+	}
+
+	if body.PrincipalStartsWith != "" {
+		search += fmt.Sprint(" and username like '" + body.PrincipalStartsWith + "%'")
+	}
+
+	return search
 }
 
 func createQueryOrder(q models.UserV1Query) string {
