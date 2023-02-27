@@ -12,6 +12,13 @@ type MbopConfig struct {
 	CognitoScope           string
 	OauthTokenURL          string
 	AmsURL                 string
+
+	StoreBackend     string
+	DatabaseHost     string
+	DatabasePort     string
+	DatabaseUser     string
+	DatabasePassword string
+	DatabaseName     string
 }
 
 var conf *MbopConfig
@@ -21,17 +28,25 @@ func Get() *MbopConfig {
 		return conf
 	}
 
-	c := &MbopConfig{}
-	c.UsersModule = fetchWithDefault("USERS_MODULE", "")
-	c.JwtModule = fetchWithDefault("JWT_MODULE", "")
-	c.JwkURL = fetchWithDefault("JWK_URL", "")
-	c.MailerModule = fetchWithDefault("MAILER_MODULE", "print")
-	c.UsersModule = fetchWithDefault("USERS_MODULE", "")
-	c.CognitoAppClientID = fetchWithDefault("COGNITO_APP_CLIENT_ID", "")
-	c.CognitoAppClientSecret = fetchWithDefault("COGNITO_APP_CLIENT_SECRET", "")
-	c.CognitoScope = fetchWithDefault("COGNITO_SCOPE", "")
-	c.OauthTokenURL = fetchWithDefault("OAUTH_TOKEN_URL", "")
-	c.AmsURL = fetchWithDefault("AMS_URL", "")
+	c := &MbopConfig{
+		UsersModule:  fetchWithDefault("USERS_MODULE", ""),
+		JwtModule:    fetchWithDefault("JWT_MODULE", ""),
+		JwkURL:       fetchWithDefault("JWK_URL", ""),
+		MailerModule: fetchWithDefault("MAILER_MODULE", "print"),
+
+		DatabaseHost:     fetchWithDefault("DATABASE_HOST", "localhost"),
+		DatabasePort:     fetchWithDefault("DATABASE_PORT", "5432"),
+		DatabaseUser:     fetchWithDefault("DATABASE_USER", "postgres"),
+		DatabasePassword: fetchWithDefault("DATABASE_PASSWORD", ""),
+		DatabaseName:     fetchWithDefault("DATABASE_NAME", "mbop"),
+		StoreBackend:     fetchWithDefault("STORE_BACKEND", "memory"),
+
+		CognitoAppClientID:     fetchWithDefault("COGNITO_APP_CLIENT_ID", ""),
+		CognitoAppClientSecret: fetchWithDefault("COGNITO_APP_CLIENT_SECRET", ""),
+		CognitoScope:           fetchWithDefault("COGNITO_SCOPE", ""),
+		OauthTokenURL:          fetchWithDefault("OAUTH_TOKEN_URL", ""),
+		AmsURL:                 fetchWithDefault("AMS_URL", ""),
+	}
 
 	conf = c
 	return conf
