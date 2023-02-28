@@ -5,8 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/redhatinsights/platform-go-middlewares/identity"
-
 	"github.com/redhatinsights/mbop/internal/service/mailer"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 

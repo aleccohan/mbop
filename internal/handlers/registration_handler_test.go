@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/redhatinsights/mbop/internal/config"
+	"github.com/redhatinsights/mbop/internal/logger"
 	"github.com/redhatinsights/mbop/internal/store"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 	"github.com/stretchr/testify/suite"
@@ -21,6 +22,7 @@ type RegistrationTestSuite struct {
 }
 
 func (suite *RegistrationTestSuite) SetupSuite() {
+	_ = logger.Init()
 	config.Reset()
 	os.Setenv("STORE_BACKEND", "memory")
 }
@@ -86,7 +88,7 @@ func (suite *RegistrationTestSuite) TestNotOrgAdmin() {
 	RegistrationHandler(suite.rec, req)
 
 	//nolint:bodyclose
-	suite.Equal(http.StatusUnauthorized, suite.rec.Result().StatusCode)
+	suite.Equal(http.StatusForbidden, suite.rec.Result().StatusCode)
 }
 
 func (suite *RegistrationTestSuite) TestNoGatewayCN() {
@@ -96,14 +98,14 @@ func (suite *RegistrationTestSuite) TestNoGatewayCN() {
 	body := []byte(`{"uid": "abc1234"}`)
 	req := httptest.NewRequest("POST", "http://foobar/registrations", bytes.NewReader(body)).
 		WithContext(context.WithValue(context.Background(), identity.Key, identity.XRHID{Identity: identity.Identity{
-			User:  identity.User{OrgAdmin: false},
+			User:  identity.User{OrgAdmin: true},
 			OrgID: "1234",
 		}}))
 
 	RegistrationHandler(suite.rec, req)
 
 	//nolint:bodyclose
-	suite.Equal(http.StatusUnauthorized, suite.rec.Result().StatusCode)
+	suite.Equal(http.StatusBadRequest, suite.rec.Result().StatusCode)
 }
 
 func (suite *RegistrationTestSuite) TestNotMatchingCN() {
@@ -121,7 +123,7 @@ func (suite *RegistrationTestSuite) TestNotMatchingCN() {
 	RegistrationHandler(suite.rec, req)
 
 	//nolint:bodyclose
-	suite.Equal(http.StatusUnauthorized, suite.rec.Result().StatusCode)
+	suite.Equal(http.StatusForbidden, suite.rec.Result().StatusCode)
 }
 
 func (suite *RegistrationTestSuite) TestExistingRegistration() {

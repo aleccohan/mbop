@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/redhatinsights/mbop/internal/config"
+	"github.com/redhatinsights/mbop/internal/logger"
 
 	"github.com/RedHatInsights/jwk2pem"
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,7 @@ type TestSuite struct {
 }
 
 func (suite *TestSuite) SetupSuite() {
+	_ = logger.Init()
 	suite.testData, _ = os.ReadFile("testdata/jwks.json")
 	suite.testDataStruct = &jwk2pem.JWKeys{}
 	err := json.Unmarshal([]byte(suite.testData), suite.testDataStruct)

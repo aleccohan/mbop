@@ -44,6 +44,7 @@ func do404(w http.ResponseWriter, msg string) {
 }
 
 func doError(w http.ResponseWriter, msg string, code int) {
+	l.Log.Info("Error during request", "error", msg, "status", code)
 	sendJSONWithStatusCode(w, newResponse(msg), code)
 }
 
