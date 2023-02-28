@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/redhatinsights/mbop/internal/service/mailer"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/mbop/internal/handlers"
@@ -38,6 +39,7 @@ func main() {
 	r.Post("/v1/sendEmails", handlers.SendEmails)
 	r.Get("/v3/accounts/{orgID}/users", handlers.AccountsV3UsersHandler)
 	r.Post("/v3/accounts/{orgID}/usersBy", handlers.AccountsV3UsersByHandler)
+	r.With(identity.EnforceIdentity).Get("/v1/registrations/token", handlers.TokenHandler)
 
 	err := mailer.InitConfig()
 	if err != nil {
