@@ -99,6 +99,26 @@ objects:
                 name: mbop-db
                 key: db.name
                 optional: true
+          - name: TOKEN_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: rsa-token-gen
+                key: private-key
+                optional: true
+          - name: TOKEN_PUBLIC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: rsa-token-gen
+                key: public-key
+                optional: true
+          - name: TOKEN_KID
+            valueFrom:
+              secretKeyRef:
+                name: rsa-token-gen
+                key: kid
+                optional: true
+          - name: TOKEN_TTL_DURATION
+            value: ${TOKEN_TTL_DURATION}
           - name: STORE_BACKEND
             value: ${STORE_BACKEND}
           image: quay.io/cloudservices/mbop:${IMAGE_TAG}
@@ -188,3 +208,6 @@ parameters:
 - name: STORE_BACKEND
   description: which store to use for satellite registrations
   value: "memory"
+- name: TOKEN_TTL_DURATION
+  description: duration string (30s, 5m, 1h, etc) for token TTL
+  value: ""

@@ -12,6 +12,10 @@ type MbopConfig struct {
 	CognitoScope           string
 	OauthTokenURL          string
 	AmsURL                 string
+	TokenTTL               string
+	TokenKID               string
+	PrivateKey             string
+	PublicKey              string
 
 	StoreBackend     string
 	DatabaseHost     string
@@ -46,6 +50,10 @@ func Get() *MbopConfig {
 		CognitoScope:           fetchWithDefault("COGNITO_SCOPE", ""),
 		OauthTokenURL:          fetchWithDefault("OAUTH_TOKEN_URL", ""),
 		AmsURL:                 fetchWithDefault("AMS_URL", ""),
+		TokenTTL:               fetchWithDefault("TOKEN_TTL_DURATION", "5m"),
+		TokenKID:               fetchWithDefault("TOKEN_KID", ""),
+		PrivateKey:             fetchWithDefault("TOKEN_PRIVATE_KEY", ""),
+		PublicKey:              fetchWithDefault("TOKEN_PUBLIC_KEY", ""),
 	}
 
 	conf = c
