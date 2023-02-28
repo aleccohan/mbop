@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/redhatinsights/mbop/internal/config"
-	l "github.com/redhatinsights/mbop/internal/logger"
 	"github.com/redhatinsights/mbop/internal/models"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
@@ -33,12 +32,14 @@ func TokenHandler(w http.ResponseWriter, r *http.Request) {
 	token := models.Token{PrivateKey: privateKey, PublicKey: pubKey}
 	ttl, err := time.ParseDuration(c.TokenTTL)
 	if err != nil {
-		l.Log.Error(err, "Error setting TTL")
+		do500(w, "Error setting TTL")
+		return
 	}
 
 	signedToken, err := token.Create(ttl, xrhid)
 	if err != nil {
-		l.Log.Error(err, "Error creating token")
+		do500(w, "Error creating token")
+		return
 	}
 
 	sendJSON(w, TokenResp{Token: signedToken})
