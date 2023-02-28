@@ -36,10 +36,10 @@ func TokenHandler(w http.ResponseWriter, r *http.Request) {
 		l.Log.Error(err, "Error setting TTL")
 	}
 
-	newToken, err := token.Create(ttl, xrhid)
+	signedToken, err := token.Create(ttl, xrhid)
 	if err != nil {
 		l.Log.Error(err, "Error creating token")
 	}
 
-	sendJSON(w, TokenResp{Token: newToken})
+	sendJSON(w, TokenResp{Token: signedToken})
 }
