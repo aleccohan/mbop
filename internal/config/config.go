@@ -13,6 +13,7 @@ type MbopConfig struct {
 	OauthTokenURL          string
 	AmsURL                 string
 	TokenTTL               string
+	TokenKID               string
 	PrivateKey             string
 	PublicKey              string
 
@@ -50,6 +51,7 @@ func Get() *MbopConfig {
 		OauthTokenURL:          fetchWithDefault("OAUTH_TOKEN_URL", ""),
 		AmsURL:                 fetchWithDefault("AMS_URL", ""),
 		TokenTTL:               fetchWithDefault("TOKEN_TTL_DURATION", "5m"),
+		TokenKID:               fetchWithDefault("TOKEN_KID", ""),
 		PrivateKey:             fetchWithDefault("TOKEN_PRIVATE_KEY", ""),
 		PublicKey:              fetchWithDefault("TOKEN_PUBLIC_KEY", ""),
 	}
