@@ -39,6 +39,7 @@ func main() {
 	r.Post("/v1/sendEmails", handlers.SendEmails)
 	r.Get("/v3/accounts/{orgID}/users", handlers.AccountsV3UsersHandler)
 	r.Post("/v3/accounts/{orgID}/usersBy", handlers.AccountsV3UsersByHandler)
+	r.With(identity.EnforceIdentity).Post("/v1/registrations", handlers.RegistrationHandler)
 	r.With(identity.EnforceIdentity).Get("/v1/registrations/token", handlers.TokenHandler)
 
 	err := mailer.InitConfig()
