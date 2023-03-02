@@ -34,7 +34,7 @@ func (p *postgresStore) All() ([]Registration, error) {
 
 func (p *postgresStore) Find(orgID, uid string) (*Registration, error) {
 	rows := p.db.QueryRow(
-		`select id, org_id, uid, extra from registrations where org_id = $1 or uid = $2 limit 1`,
+		`select id, org_id, uid, extra from registrations where org_id = $1 and uid = $2 limit 1`,
 		orgID,
 		uid,
 	)

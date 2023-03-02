@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/redhatinsights/mbop/internal/config"
 
 	// this is the iofs:// driver for go-migrate.
