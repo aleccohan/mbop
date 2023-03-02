@@ -12,7 +12,7 @@ func (m *inMemoryStore) All() ([]Registration, error) {
 
 func (m *inMemoryStore) Find(orgID string, uid string) (*Registration, error) {
 	for _, r := range m.db {
-		if r.OrgID == orgID || r.UID == uid {
+		if r.OrgID == orgID && r.UID == uid {
 			return &r, nil
 		}
 	}
@@ -21,6 +21,17 @@ func (m *inMemoryStore) Find(orgID string, uid string) (*Registration, error) {
 }
 
 func (m *inMemoryStore) Create(r *Registration) (string, error) {
+	x, _ := m.Find(r.OrgID, r.UID)
+	if x != nil {
+		return "", ErrRegistrationAlreadyExists
+	}
+
+	for i := range m.db {
+		if m.db[i].UID == r.UID {
+			return "", ErrUIDAlreadyExists
+		}
+	}
+
 	m.db = append(m.db, *r)
 	return "", nil
 }

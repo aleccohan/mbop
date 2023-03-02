@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	// the pgx driver for the database
+	_ "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/pkg/errors"
 	l "github.com/redhatinsights/mbop/internal/logger"
 )
@@ -34,7 +36,7 @@ func (p *postgresStore) All() ([]Registration, error) {
 
 func (p *postgresStore) Find(orgID, uid string) (*Registration, error) {
 	rows := p.db.QueryRow(
-		`select id, org_id, uid, extra from registrations where org_id = $1 or uid = $2 limit 1`,
+		`select id, org_id, uid, extra from registrations where org_id = $1 and uid = $2 limit 1`,
 		orgID,
 		uid,
 	)

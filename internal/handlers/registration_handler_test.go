@@ -127,7 +127,25 @@ func (suite *RegistrationTestSuite) TestNotMatchingCN() {
 }
 
 func (suite *RegistrationTestSuite) TestExistingRegistration() {
-	_, err := suite.store.Create(&store.Registration{UID: "abc1234"})
+	_, err := suite.store.Create(&store.Registration{UID: "abc1234", OrgID: "1234"})
+	suite.Nil(err)
+
+	body := []byte(`{"uid": "abc1234"}`)
+	req := httptest.NewRequest("POST", "http://foobar/registrations", bytes.NewReader(body)).
+		WithContext(context.WithValue(context.Background(), identity.Key, identity.XRHID{Identity: identity.Identity{
+			User:  identity.User{OrgAdmin: true},
+			OrgID: "1234",
+		}}))
+	req.Header.Set("x-rh-certauth-cn", "/CN=abc1234")
+
+	RegistrationHandler(suite.rec, req)
+
+	//nolint:bodyclose
+	suite.Equal(http.StatusConflict, suite.rec.Result().StatusCode)
+}
+
+func (suite *RegistrationTestSuite) TestExistingUid() {
+	_, err := suite.store.Create(&store.Registration{UID: "abc1234", OrgID: "2345"})
 	suite.Nil(err)
 
 	body := []byte(`{"uid": "abc1234"}`)

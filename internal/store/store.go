@@ -2,11 +2,10 @@ package store
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
-	"github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/redhatinsights/mbop/internal/config"
-	"github.com/redhatinsights/mbop/internal/store/migrations"
 )
 
 // GetStore is a function that will return the currently configured store. this
@@ -15,6 +14,11 @@ var GetStore func() Store
 
 // persistent ref to an in-memory store if present
 var mem Store
+
+var (
+	ErrRegistrationAlreadyExists = errors.New("registration already exists")
+	ErrUIDAlreadyExists          = errors.New("uid already exists")
+)
 
 func SetupStore() error {
 	switch config.Get().StoreBackend {
@@ -49,12 +53,7 @@ func setupPostgresStore() (*postgresStore, error) {
 		return nil, err
 	}
 
-	driver, err := pgx.WithInstance(db, &pgx.Config{})
-	if err != nil {
-		return nil, err
-	}
-
-	err = migrations.Migrate(driver)
+	err = migrateDatabase()
 	if err != nil {
 		return nil, err
 	}

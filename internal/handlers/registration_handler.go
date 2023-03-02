@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -63,7 +64,11 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		UID:   *body.UID,
 	})
 	if err != nil {
-		do500(w, "failed to create registration: "+err.Error())
+		if errors.Is(store.ErrUIDAlreadyExists, err) {
+			doError(w, "existing registration found", 409)
+		} else {
+			do500(w, "failed to create registration: "+err.Error())
+		}
 		return
 	}
 
