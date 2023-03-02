@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	_ "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/redhatinsights/mbop/internal/config"
 )
 
@@ -18,7 +17,7 @@ var mem Store
 
 var (
 	ErrRegistrationAlreadyExists = errors.New("registration already exists")
-	ErrUidAlreadyExists          = errors.New("uid already exists")
+	ErrUIDAlreadyExists          = errors.New("uid already exists")
 )
 
 func SetupStore() error {

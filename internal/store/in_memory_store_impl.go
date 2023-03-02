@@ -28,7 +28,7 @@ func (m *inMemoryStore) Create(r *Registration) (string, error) {
 
 	for i := range m.db {
 		if m.db[i].UID == r.UID {
-			return "", ErrUidAlreadyExists
+			return "", ErrUIDAlreadyExists
 		}
 	}
 
