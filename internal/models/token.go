@@ -29,6 +29,7 @@ func (t Token) Create(ttl time.Duration, xrhid identity.Identity) (string, error
 	claims["kid"] = config.Get().TokenKID
 	claims["org_id"] = xrhid.OrgID
 	claims["username"] = xrhid.User.Username
+	claims["is_org_admin"] = xrhid.User.OrgAdmin
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(key)
 	if err != nil {
